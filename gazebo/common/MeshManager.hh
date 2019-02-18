@@ -99,11 +99,16 @@ namespace gazebo
       /// See ~MeshManager.
       /// \param[in] the mesh to add.
       public: void AddMesh(Mesh *_mesh);
+      
+		/// \brief Remove a mesh from the manager.
+      /// \param[in] the name of the mesh to remove.
+      public: void RemoveMesh(const std::string &_name);
+
 
       /// \brief Get a mesh by name.
       /// \param[in] _name the name of the mesh to look for
       /// \return the mesh or nullptr if not found
-      public: const Mesh *GetMesh(const std::string &_name) const;
+      public: Mesh *GetMesh(const std::string &_name) const;
 
       /// \brief Return true if the mesh exists.
       /// \param[in] _name the name of the mesh
@@ -113,9 +118,9 @@ namespace gazebo
       /// \param[in] _name the name of the mesh
       /// \param[in] _radius radius of the sphere in meter
       /// \param[in] _rings number of circles on th y axis
-      /// \param[in] _segments number of segment per circle
+      /// \param[i _segments number of segment per circle
       public: void CreateSphere(const std::string &_name, float _radius,
-                                int _rings, int _segments);
+                                int _rings, int _segments, SubMesh *subMesh = nullptr);
 
       /// \brief Create a Box mesh
       /// \param[in] _name the name of the new mesh
@@ -123,7 +128,7 @@ namespace gazebo
       /// \param[in] _uvCoords the texture coordinates
       public: void CreateBox(const std::string &_name,
                              const ignition::math::Vector3d &_sides,
-                             const ignition::math::Vector2d &_uvCoords);
+                             const ignition::math::Vector2d &_uvCoords, SubMesh *subMesh = nullptr);
 
       /// \brief Create an extruded mesh from polylines. The polylines are
       /// assumed to be closed and non-intersecting. Delaunay triangulation is
@@ -139,7 +144,7 @@ namespace gazebo
       /// \param[in] _height the height of extrusion
       public: void CreateExtrudedPolyline(const std::string &_name,
                   const std::vector<std::vector<ignition::math::Vector2d> >
-                  &_vertices, double _height);
+                  &_vertices, double _height, SubMesh *subMesh = nullptr);
 
       /// \brief Create a cylinder mesh
       /// \param[in] _name the name of the new mesh
@@ -151,7 +156,7 @@ namespace gazebo
                                   float _radius,
                                   float _height,
                                   int _rings,
-                                  int _segments);
+                                  int _segments, SubMesh *subMesh = nullptr);
 
       /// \brief Create a cone mesh
       /// \param[in] _name the name of the new mesh
@@ -163,7 +168,7 @@ namespace gazebo
                               float _radius,
                               float _height,
                               int _rings,
-                              int _segments);
+                              int _segments, SubMesh *subMesh = nullptr);
 
       /// \brief Create a tube mesh.
       ///
@@ -182,7 +187,7 @@ namespace gazebo
                               float _height,
                               int _rings,
                               int _segments,
-                              double _arc = 2.0 * M_PI);
+                              double _arc = 2.0 * M_PI, SubMesh *subMesh = nullptr);
 
       /// \brief Create mesh for a plane
       /// \param[in] _name
@@ -192,7 +197,7 @@ namespace gazebo
       public: void CreatePlane(const std::string &_name,
                                const ignition::math::Planed &_plane,
                                const ignition::math::Vector2d &_segments,
-                               const ignition::math::Vector2d &_uvTile);
+                               const ignition::math::Vector2d &_uvTile, SubMesh *subMesh = nullptr);
 
       /// \brief Create mesh for a plane
       /// \param[in] _name the name of the new mesh
@@ -206,7 +211,7 @@ namespace gazebo
                                const double _d,
                                const ignition::math::Vector2d &_size,
                                const ignition::math::Vector2d &_segments,
-                               const ignition::math::Vector2d &_uvTile);
+                               const ignition::math::Vector2d &_uvTile, SubMesh *subMesh = nullptr);
 
       /// \brief Tesselate a 2D mesh
       ///

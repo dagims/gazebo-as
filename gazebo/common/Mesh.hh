@@ -44,6 +44,9 @@ namespace gazebo
       /// \brief Constructor
       public: Mesh();
 
+		/// \brief Copy Constructor
+		public: Mesh(const Mesh *_mesh_p);
+
       /// \brief Destructor
       public: virtual ~Mesh();
 

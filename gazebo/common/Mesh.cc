@@ -37,6 +37,19 @@ Mesh::Mesh()
 }
 
 //////////////////////////////////////////////////
+Mesh::Mesh(const Mesh *_mesh_p)
+{
+  this->name = _mesh_p->name;
+  this->skeleton = _mesh_p->skeleton;
+  this->path = _mesh_p->path;
+  this->submeshes = std::vector<SubMesh*>(_mesh_p->submeshes);
+  this->materials = std::vector<Material*>(_mesh_p->materials);
+  this->skeleton = nullptr;
+  if(_mesh_p->skeleton)
+    this->skeleton = _mesh_p->skeleton;
+}
+
+//////////////////////////////////////////////////
 Mesh::~Mesh()
 {
   for (std::vector<SubMesh*>::iterator iter = this->submeshes.begin();

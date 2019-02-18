@@ -74,6 +74,9 @@ namespace gazebo
       /// \param[out] _msg Message to fill.
       public: void FillMsg(msgs::Geometry &_msg);
 
+		public: const common::Mesh *GetMesh() { return mesh; }
+		public: common::SubMesh *GetSubMesh() { return submesh; }
+
       /// \brief Update this shape from a message.
       /// \param[in] _msg Message that contains triangle mesh info.
       public: virtual void ProcessMsg(const msgs::Geometry &_msg);

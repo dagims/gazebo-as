@@ -232,7 +232,14 @@ void MeshManager::AddMesh(Mesh *_mesh)
 }
 
 //////////////////////////////////////////////////
-const Mesh *MeshManager::GetMesh(const std::string &_name) const
+void MeshManager::RemoveMesh(const std::string &_name)
+{
+  if (this->HasMesh(_name))
+    this->meshes.erase(_name);
+}
+
+//////////////////////////////////////////////////
+Mesh *MeshManager::GetMesh(const std::string &_name) const
 {
   std::map<std::string, Mesh*>::const_iterator iter;
 
@@ -258,7 +265,7 @@ bool MeshManager::HasMesh(const std::string &_name) const
 
 //////////////////////////////////////////////////
 void MeshManager::CreateSphere(const std::string &name, float radius,
-    int rings, int segments)
+    int rings, int segments, SubMesh *subMesh)
 {
   if (this->HasMesh(name))
   {
@@ -275,7 +282,8 @@ void MeshManager::CreateSphere(const std::string &name, float radius,
   mesh->SetName(name);
   this->meshes.insert(std::make_pair(name, mesh));
 
-  SubMesh *subMesh = new SubMesh();
+  if(subMesh == nullptr)
+    subMesh = new SubMesh();
   mesh->AddSubMesh(subMesh);
 
   // Generate the group of rings for the sphere
@@ -316,14 +324,16 @@ void MeshManager::CreateSphere(const std::string &name, float radius,
   }
 }
 
+
+
 //////////////////////////////////////////////////
 void MeshManager::CreatePlane(const std::string &_name,
     const ignition::math::Planed &_plane,
     const ignition::math::Vector2d &_segments,
-    const ignition::math::Vector2d &_uvTile)
+    const ignition::math::Vector2d &_uvTile, SubMesh *subMesh)
 {
   this->CreatePlane(_name, _plane.Normal(), _plane.Offset(), _plane.Size(),
-      _segments, _uvTile);
+      _segments, _uvTile, subMesh);
 }
 
 //////////////////////////////////////////////////
@@ -332,7 +342,7 @@ void MeshManager::CreatePlane(const std::string &_name,
     const double _d,
     const ignition::math::Vector2d &_size,
     const ignition::math::Vector2d &_segments,
-    const ignition::math::Vector2d &_uvTile)
+    const ignition::math::Vector2d &_uvTile, SubMesh *subMesh)
 {
   if (this->HasMesh(_name))
   {
@@ -343,7 +353,8 @@ void MeshManager::CreatePlane(const std::string &_name,
   mesh->SetName(_name);
   this->meshes.insert(std::make_pair(_name, mesh));
 
-  SubMesh *subMesh = new SubMesh();
+  if(subMesh == nullptr)
+    subMesh = new SubMesh();
   mesh->AddSubMesh(subMesh);
 
   ignition::math::Vector3d zAxis, yAxis, xAxis;
@@ -410,7 +421,7 @@ void MeshManager::CreatePlane(const std::string &_name,
 //////////////////////////////////////////////////
 void MeshManager::CreateBox(const std::string &_name,
     const ignition::math::Vector3d &_sides,
-    const ignition::math::Vector2d &_uvCoords)
+    const ignition::math::Vector2d &_uvCoords, SubMesh *subMesh)
 {
   int i, k;
 
@@ -423,7 +434,8 @@ void MeshManager::CreateBox(const std::string &_name,
   mesh->SetName(_name);
   this->meshes.insert(std::make_pair(_name, mesh));
 
-  SubMesh *subMesh = new SubMesh();
+  if(subMesh == nullptr)
+    subMesh = new SubMesh();
   mesh->AddSubMesh(subMesh);
 
   // Vertex values
@@ -512,7 +524,7 @@ void MeshManager::CreateBox(const std::string &_name,
 //////////////////////////////////////////////////
 void MeshManager::CreateExtrudedPolyline(const std::string &_name,
     const std::vector<std::vector<ignition::math::Vector2d> > &_polys,
-    double _height)
+    double _height, SubMesh *subMesh)
 {
   // distance tolerence between 2 points. This is used when creating a list
   // of distinct points in the polylines.
@@ -547,7 +559,8 @@ void MeshManager::CreateExtrudedPolyline(const std::string &_name,
   Mesh *mesh = new Mesh();
   mesh->SetName(_name);
 
-  SubMesh *subMesh = new SubMesh();
+  if(subMesh == nullptr)
+    subMesh = new SubMesh();
   mesh->AddSubMesh(subMesh);
 
   std::vector<ignition::math::Vector2d> vertices;
@@ -825,7 +838,7 @@ void MeshManager::CreateCamera(const std::string &_name, float _scale)
 
 //////////////////////////////////////////////////
 void MeshManager::CreateCylinder(const std::string &name, float radius,
-                                 float height, int rings, int segments)
+                                 float height, int rings, int segments, SubMesh *subMesh)
 {
   ignition::math::Vector3d vert, norm;
   unsigned int verticeIndex = 0;
@@ -841,7 +854,8 @@ void MeshManager::CreateCylinder(const std::string &name, float radius,
   mesh->SetName(name);
   this->meshes.insert(std::make_pair(name, mesh));
 
-  SubMesh *subMesh = new SubMesh();
+  if(subMesh == nullptr)
+    subMesh = new SubMesh();
   mesh->AddSubMesh(subMesh);
 
   // Generate the group of rings for the cylinder
@@ -942,7 +956,7 @@ void MeshManager::CreateCylinder(const std::string &name, float radius,
 
 //////////////////////////////////////////////////
 void MeshManager::CreateCone(const std::string &name, float radius,
-    float height, int rings, int segments)
+    float height, int rings, int segments, SubMesh *subMesh)
 {
   ignition::math::Vector3d vert, norm;
   unsigned int verticeIndex = 0;
@@ -958,7 +972,8 @@ void MeshManager::CreateCone(const std::string &name, float radius,
   mesh->SetName(name);
   this->meshes.insert(std::make_pair(name, mesh));
 
-  SubMesh *subMesh = new SubMesh();
+  if(subMesh == nullptr)
+    subMesh = new SubMesh();
   mesh->AddSubMesh(subMesh);
 
   if (segments <3)
@@ -1052,7 +1067,7 @@ void MeshManager::CreateCone(const std::string &name, float radius,
 
 //////////////////////////////////////////////////
 void MeshManager::CreateTube(const std::string &_name, float _innerRadius,
-    float _outerRadius, float _height, int _rings, int _segments, double _arc)
+    float _outerRadius, float _height, int _rings, int _segments, double _arc, SubMesh *subMesh)
 {
   ignition::math::Vector3d vert, norm;
   unsigned int verticeIndex = 0;
@@ -1074,7 +1089,9 @@ void MeshManager::CreateTube(const std::string &_name, float _innerRadius,
   Mesh *mesh = new Mesh();
   mesh->SetName(_name);
   this->meshes.insert(std::make_pair(_name, mesh));
-  SubMesh *subMesh = new SubMesh();
+    
+  if(subMesh == nullptr)
+	 subMesh = new SubMesh();
   mesh->AddSubMesh(subMesh);
 
   // Generate the group of rings for the outsides of the cylinder
