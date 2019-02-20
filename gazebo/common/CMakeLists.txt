@@ -280,6 +280,10 @@ if (HAVE_OPENAL)
   target_link_libraries(gazebo_common ${OPENAL_LIBRARY})
 endif()
 
+if (HAVE_ALSA)
+  target_link_libraries(gazebo_common ${ALSA_LIBRARIES})
+endif()
+
 if (HAVE_GDAL)
   target_link_libraries(gazebo_common ${GDAL_LIBRARY})
 endif()

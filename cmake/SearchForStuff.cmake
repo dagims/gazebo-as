@@ -80,6 +80,17 @@ else ()
 endif ()
 
 ########################################
+pkg_check_modules(ALSA alsa)
+add_definitions(-DHAVE_AUDIO)
+if (ALSA_FOUND)
+  message(STATUS "alsa is found, it's found! it's fucking found! this will build!")
+  set(HAVE_ALSA 1)
+else()
+  BUILD_WARNING("ALSA Not Found!")
+  set(HAVE_ALSA 0)
+endif()
+
+########################################
 find_package(HDF5 COMPONENTS C CXX)
 
 if (NOT HDF5_FOUND)
