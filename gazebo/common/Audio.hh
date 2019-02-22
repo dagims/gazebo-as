@@ -39,8 +39,10 @@ namespace gazebo
     class GZ_COMMON_VISIBLE Audio
     {
       /// \brief Constructor
-      public: Audio(bool _captureMode, std::string _deviceName,
-                    unsigned int _sampleRate, unsigned long _frames);
+      public: Audio(bool _captureMode = true,
+                    std::string _deviceName = "default",
+                    unsigned int _sampleRate = 44100,
+                    unsigned long _frames = 64);
 
       /// \brief Destructor
       public: ~Audio();
@@ -57,43 +59,38 @@ namespace gazebo
       /// \return True if successfully paused
       public: bool Stop();
 
-      /// \brief ShutDown 
+      /// \brief ShutDown
       public: void Shutdown();
 
       /// \brief Get Sample Rate
       /// \return Sample Rate
       public: unsigned int GetSampleRate() const;
 
-      /// \brief Fill buffer with data from capture device
-      /// \param[out] _buf a buffer for holding captured data
-      /// \param[out] _numFrames the number of frames in buffer *_buf
-      /// \return AudioReadStatusCode
-      public: AudioReadStatusCode ReadFrames(float **_buf, unsigned long *_numFrames);
-
-      /// \brief Write data to playback device
-      /// \param[in] _buf buffer holding data to be written to device
-      /// \param[in] _numFrames number of of frames in buffer
-      /// \return AudioWriteStatusCode
-      public: AudioWriteStatusCode WriteFrames(float *_buf, unsigned long *_numFrames);
-      
       /// \brief Audio Write Status Codes
-      public: typedef enum {
-                       AUDIO_WRITE_OK,
-                       AUDIO_INPUT_READ_ERROR,
-                       AUDIO_WRITE_UNDERRUN,
-                       AUDIO_WRITE_ERROR,
-                       AUDIO_SHORT_WRITE,
-                       AUDIO_OBJ_ERROR}
-                       AudioWriteStatusCode;
-
-      /// \brief Audio Read Status Codes
       public: typedef enum {
                        AUDIO_READ_OK,
                        AUDIO_READ_OVERRUN,
                        AUDIO_READ_ERROR,
                        AUDIO_SHORT_READ,
+                       AUDIO_WRITE_OK,
+                       AUDIO_WRITE_UNDERRUN,
+                       AUDIO_WRITE_ERROR,
+                       AUDIO_SHORT_WRITE,
+                       AUDIO_INPUT_ERROR,
                        AUDIO_OBJ_ERROR}
-                       AudioReadStatusCode;
+                       AudioIOStatusCode;
+
+      /// \brief Fill buffer with data from capture device
+      /// \param[out] _buf a buffer for holding captured data
+      /// \param[out] _numFrames the number of frames in buffer *_buf
+      /// \return AudioReadStatusCode
+      public: AudioIOStatusCode ReadFrames(float **_buf, long &_numFrames);
+
+      /// \brief Write data to playback device
+      /// \param[in] _buf buffer holding data to be written to device
+      /// \param[in] _numFrames number of of frames in buffer
+      /// \return AudioWriteStatusCode
+      public: AudioIOStatusCode WriteFrames(float *_buf, long _numFrames);
 
       /// \brief Sample Rate
       private: unsigned int sampleRate;
@@ -118,13 +115,9 @@ namespace gazebo
 
       /// \internal
       private: int ret;
-
-
     };
-
     /// \}
- 
   }
 }
 
-#endif //_GAZEBO_AUDIO_HH_ 
+#endif //_GAZEBO_AUDIO_HH_

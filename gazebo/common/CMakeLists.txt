@@ -89,6 +89,7 @@ endif()
 set (headers
   Animation.hh
   Assert.hh
+  Audio.hh
   AudioDecoder.hh
   Battery.hh
   Base64.hh

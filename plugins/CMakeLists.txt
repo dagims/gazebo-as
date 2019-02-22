@@ -60,6 +60,7 @@ set (plugins_single_header
   ContainPlugin
   DepthCameraPlugin
   DiffDrivePlugin
+  ExportWorldPlugin
   FiducialCameraPlugin
   FlashLightPlugin
   FollowerPlugin

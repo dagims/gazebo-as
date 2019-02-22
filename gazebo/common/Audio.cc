@@ -32,20 +32,19 @@ Audio::Audio(bool _captureMode, std::string _deviceName,
   this->bufferSize = 0;
   this->audioBuffer = nullptr;
   this->runningStatus = false;
-  
-  snd_pcm_hw_params_t *hw_params;
-  int ret, dir, direction;
 
-  direction = this->captureMode ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK;
+  snd_pcm_hw_params_t *hw_params;
+  int dir;
+
+  snd_pcm_stream_t direction = this->captureMode ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK;
 
   ret = snd_pcm_open(&this->deviceHandle, _deviceName.c_str(), direction, 0);
   if(ret < 0)
   {
     gzerr << "Error Opening Capture Device: " << snd_strerror(ret) << "\n";
-    //XXX set the object to null on error
     return;
   }
-    
+
   snd_pcm_hw_params_alloca(&hw_params);
   snd_pcm_hw_params_any(this->deviceHandle, hw_params);
 
@@ -60,19 +59,22 @@ Audio::Audio(bool _captureMode, std::string _deviceName,
     snd_pcm_hw_params_set_access(this->deviceHandle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
     this->bufferSize = this->audioFrames * 4 * 2; // 4 bytes/s , 2 channels
   }
-    
+
   snd_pcm_hw_params_set_format(this->deviceHandle, hw_params, SND_PCM_FORMAT_FLOAT_LE);
   snd_pcm_hw_params_set_rate_near(this->deviceHandle, hw_params, &this->sampleRate, &dir);
   snd_pcm_hw_params_set_period_size_near(this->deviceHandle, hw_params, &this->audioFrames, &dir);
   ret = snd_pcm_hw_params(this->deviceHandle, hw_params);
+  
   if(ret < 0)
   {
     gzerr << "Error Writing Capture HW Params: " << snd_strerror(ret) << "\n";
     return;
   }
 
-  this->audioBuffer = malloc(this->bufferSize);
+  this->audioBuffer = (float *)malloc(this->bufferSize);
   this->runningStatus = true;
+
+  gzerr << "yeaaaaaaaaaaaaaaaaaaaaaaaa maaaaaaaaaaaaaaaan\n";
 }
 
 ////////////////////////////////////////////////////////
@@ -96,7 +98,7 @@ bool Audio::Start()
 }
 
 ////////////////////////////////////////////////////////
-Audio::Stop()
+bool Audio::Stop()
 {
   //TODO threaded callback stop
   this->runningStatus = false;
@@ -106,6 +108,7 @@ Audio::Stop()
 ////////////////////////////////////////////////////////
 void Audio::Shutdown()
 {
+  this->runningStatus = false;
   snd_pcm_drain(this->deviceHandle);
   snd_pcm_close(this->deviceHandle);
   free(this->audioBuffer);
@@ -118,87 +121,87 @@ unsigned int Audio::GetSampleRate() const
 }
 
 ////////////////////////////////////////////////////////
-AudioReadStatusCode ReadFrames(float **_buf, unsigned long *_numFrames)
+Audio::AudioIOStatusCode Audio::ReadFrames(float **_buf, long &_numFrames)
 {
   if (!this->runningStatus)
   {
     gzerr << "Audio Object Not Alive! See if there's a problem during creation.\n";
-    return AudioReadStatusCode::AUDIO_OBJ_ERROR;
+    return AUDIO_OBJ_ERROR;
   }
 
   if (!this->captureMode)
   {
-    gzerr << "Audio Object Is Not On Capture Mode.\n"
-    return AudioReadStatusCode::AUDIO_OBJ_ERROR;
+    gzerr << "Audio Object is Not in Capture Mode.\n";
+    return AUDIO_OBJ_ERROR;
   }
 
-  if (*_buf)
-  {
-    delete [] *_buf;
-    *_buf = nullptr;
-  }
-
-  this->ret = snd_pcm_readi(this->deviceHandle, this->audioBuffer, this->audioFrames);
+  //XXX fix this! this shouldn't be like this.
+  this->ret = snd_pcm_readi(this->deviceHandle, *_buf, this->audioFrames);
   if (this->ret == -EPIPE)
   {
     gzwarn << "Audio Read Overrun!\n";
     snd_pcm_prepare(this->deviceHandle);
-    memcpy(*_buf, this->audioBuffer, *_numFrames);
-    return AudioReadStatusCode::AUDIO_READ_OVERRUN;
+    return AUDIO_READ_OVERRUN;
   }
   else if (this->ret < 0)
   {
     gzerr << "Error! Problem Reading: " << snd_strerror(this->ret) << "\n";
-    *_numFrames = 0;
-    return AudioReadStatusCode::AUDIO_READ_ERROR;
+    _numFrames = 0;
+    return AUDIO_READ_ERROR;
   }
   else if (this->ret != this->audioFrames)
   {
     gzwarn << "Audio Short Read. Read: " << this->ret << " For Frames: " << this->audioFrames << "\n";
-    *_numFrames = this->ret;
-    memcpy(*_buf, this->audioBuffer, *_numFrames);
-    return AudioReadStatusCode::AUDIO_SHORT_READ;
+    _numFrames = this->ret;
+    return AUDIO_SHORT_READ;
   }
-  
-  memcpy(*_buf, this->audioBuffer, this->audioFrames);
-  return AudioReadStatusCode::AUDIO_READ_OK;
+  _numFrames = this->audioFrames;
+  return AUDIO_READ_OK;
 }
 
 ////////////////////////////////////////////////////////
-AudioWriteStatusCode WriteFrames(float *_buf, unsigned long *_numFrames)
+Audio::AudioIOStatusCode Audio::WriteFrames(float *_buf, long _numFrames)
 {
   if (!this->runningStatus)
   {
     gzerr << "Audio Object Not Alive! See if there's a problem during creation.\n";
-    return AudioWriteStatusCode::AUDIO_OBJ_ERROR;
+    return AUDIO_OBJ_ERROR;
   }
 
   if (this->captureMode)
   {
-    gzerr << "Audio Object Is Not On Playback Mode.\n"
-    return AudioWriteStatusCode::AUDIO_OBJ_ERROR;
+    gzerr << "Audio Object is Not in Playback Mode.\n";
+    return AUDIO_OBJ_ERROR;
   }
-  
-  //TODO copy buffer data to this->audioBuffer and 
-  //     do error checks here on data sent from the user. 
-  //     see if the num of frames if correct, 
-  //         if the buffer isn't null...
-  this-ret = snd_pcm_writei(this->deviceHandle, _buf, this->audioFrames);
+
+  if (_numFrames < 0)
+  {
+    gzerr << "Can Have Negative Number of Frames\n";
+    return AUDIO_INPUT_ERROR;
+  }
+
+  if (_buf == nullptr)
+  {
+    gzerr << "Buffer Must Contain Appropriate Data\n";
+    return AUDIO_INPUT_ERROR;
+  }
+
+  this->ret = snd_pcm_writei(this->deviceHandle, _buf, _numFrames);
 
   if(this->ret == -EPIPE)
   {
     gzwarn << "Audio Write UnderRun\n";
-    return AudioWriteStatusCode::AUDIO_WRITE_UNDERRUN;
+    return AUDIO_WRITE_UNDERRUN;
   }
   else if (this->ret < 0)
   {
     gzerr << "Error! Problem Writing to Playback Device: " << snd_strerror(this->ret) << "\n";
-    return AudioWriteStatusCode::AUDIO_WRITE_ERROR;
+    return AUDIO_WRITE_ERROR;
   }
-  else if (this->ret != this->audioFrames)
+  else if (this->ret != _numFrames)
   {
-    gzwarn << "Audi Short Write. Wrote: " << this->ret << "From Frames: " << this->audioFrames << "\n";
-    return AudioWriteStatusCode::AUDIO_SHORT_WRITE;
+    gzwarn << "Audi Short Write. Wrote: " << this->ret << "From Frames: " << _numFrames << "\n";
+    return AUDIO_SHORT_WRITE;
   }
-  return AudioWriteStatusCode::AUDIO_WRITE_OK;
+  return AUDIO_WRITE_OK;
 }

@@ -66,7 +66,7 @@ namespace gazebo
       public: SteamAudioGeneratorPtr CreateSource(sdf::ElementPtr _sdf);
 
       /// \brief Create an audio listener.
-		/// Only one listener may be created.
+      /// Only one listener may be created.
       /// \param[in] _sdf SDF element parameters for an audio_listener
       /// \return A pointer to an SteamAudioListener object.
       public: SteamAudioListenerPtr CreateListener(sdf::ElementPtr _sdf);
@@ -89,8 +89,16 @@ namespace gazebo
       private: IPLvoid steamLogCallback(char *msg);
 
       /// \internal
-      /// \brief AudioDecoder object
-      private: common::AudioDecoder *audiodecoder;
+      /// \brief Audio Input object
+      private: common::Audio *iaudio;
+
+      /// \internal
+      /// \brief Audio Output object
+      private: common::Audio *oaudio;
+
+      /// \internal
+      /// \brief Audio Device Manager Object
+      private: common::Audio *audio;
 
       /// \internal
       /// \brief SteamAudio Context
