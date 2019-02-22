@@ -10,6 +10,7 @@
 #include "gazebo/transport/transport.hh"
 #include "gazebo/msgs/msgs.hh"
 
+
 namespace gazebo
 {
 class GAZEBO_VISIBLE ExportWorldPlugin : public WorldPlugin
@@ -26,6 +27,11 @@ class GAZEBO_VISIBLE ExportWorldPlugin : public WorldPlugin
   private: unsigned int models_n, n;
   private: common::Mesh *mesh_p;
   private: std::map<uint32_t, std::string> shape_types;
+
+  private: common::Audio *iaudio;
+  private: common::Audio *oaudio;
+  private: float *audioBuffer;
+  private: long bufferSize;
 
   typedef std::map<uint32_t, msgs::Visual> Visuals_M;
 

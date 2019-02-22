@@ -60,16 +60,17 @@ namespace gazebo
       /// \brief Finalize.
       public: void Fini();
 
-      /// \brief Create an SteamAudioGenerator object.
+      /// \brief Specify Audio Generator link
+      /// Only one generator may be created
       /// \param[in] _sdf SDF element parameters for an audio_generator
       /// \return A pointer to an SteamAudioGenerator object.
-      public: SteamAudioGeneratorPtr CreateSource(sdf::ElementPtr _sdf);
+      public: void GeneratorLink(sdf::ElementPtr _sdf);
 
-      /// \brief Create an audio listener.
+      /// \brief Specify audio listener link.
       /// Only one listener may be created.
       /// \param[in] _sdf SDF element parameters for an audio_listener
       /// \return A pointer to an SteamAudioListener object.
-      public: SteamAudioListenerPtr CreateListener(sdf::ElementPtr _sdf);
+      public: void ListenerLink (sdf::ElementPtr _sdf);
 
       /// \brief Get a list of available audio devices
       /// \return A list of audio device names
@@ -84,9 +85,37 @@ namespace gazebo
       /// \return The URI of the SOFA file, empty if none loaded
       public: std::string GetSOFAuri() const;
 
+      /// \brief Set Listener Pose
+      /// \param[in] World Pose of the Audio Listener link
+      public: void SetListenerPose(const ignition::math::Pose3d &_pose);
+
+      /// \brief Set Generator Pose
+      /// \param[in] World Pose of the Audio Generator Link
+      public: void SetGeneratorPose(const ignition::math::Pose3d &_pose);
+
       /// \internal
       /// \brief Callback for log messages from SteamAudio
       private: IPLvoid steamLogCallback(char *msg);
+
+      /// \internal
+      /// \brief Audio Input object
+      private: physics::LinkPtr audioGenerator;
+
+      /// \internal
+      /// \brief Audio Input object
+      private: physics::LinkPtr audioListener;
+
+      /// \internal
+      /// \brief Audio Generator Pose
+      private: ignition::math::Pose3d generatorPose;
+
+      /// \internal
+      /// \brief Audio Listener Pose
+      private: ignition::math::Pose3d listenerPose;
+
+      /// \internal
+      /// \brief Audio Listener Relative Location
+      private: ignition::math::Vector3d listenerLocation;
 
       /// \internal
       /// \brief Audio Input object
@@ -95,10 +124,6 @@ namespace gazebo
       /// \internal
       /// \brief Audio Output object
       private: common::Audio *oaudio;
-
-      /// \internal
-      /// \brief Audio Device Manager Object
-      private: common::Audio *audio;
 
       /// \internal
       /// \brief SteamAudio Context
@@ -138,68 +163,6 @@ namespace gazebo
 
       /// \brief This is a singleton
       private: friend class SingletonT<SteamAudio>;
-    };
-
-    /// \class SteamAudioListener SteamAudio.hh util/util.hh
-    /// \brief SteamAudio Listener. This can be thought of as a microphone.
-    class GZ_UTIL_VISIBLE SteamAudioListener
-    {
-      /// \brief Constructor
-      public: SteamAudioListener();
-
-      /// \brief Destructor
-      public: virtual ~SteamAudioListener();
-
-      /// \brief Set the position of the listener
-      /// \param[in] _pose New pose of the listener
-      /// \return True on success.
-      public: bool SetPose(const ignition::math::Pose3d &_pose);
-    };
-
-    /// \class SteamAudioGenerator SteamAudioGenerator.hh util/util.hh
-    /// \brief SteamAudio Source. This can be thought of as a speaker.
-    class GZ_UTIL_VISIBLE SteamAudioGenerator
-    {
-      /// \brief Constructor.
-      public: SteamAudioGenerator();
-
-      /// \brief Destructor.
-      public: ~SteamAudioGenerator();
-
-      /// \brief Load the source from sdf.
-      /// \param[in] _sdf SDF element parameters for an audio_source.
-      /// \return True on success.
-      public: bool Load(sdf::ElementPtr _sdf);
-
-      /// \brief Set the position of the source.
-      /// \param[in] _pose New pose of the source.
-      /// \return True on success.
-      public: bool SetPose(const ignition::math::Pose3d &_pose);
-
-      /// \brief Play a sound
-      public: void Play();
-
-      /// \brief Pause a sound
-      public: void Pause();
-
-      /// \brief Is the audio playing
-      public: bool IsPlaying();
-
-      /// \brief Fill the SteamAudio audio buffer from PCM data
-      /// \param[in] _pcmData Pointer to the PCM audio data.
-      /// \param[in] _dataCount Size of the PCM data.
-      /// \param[in] _sampleRate Sample rate for the PCM data.
-      /// \return True on success.
-      public: bool FillBufferFromPCM(float *_pcmData, unsigned long _dataCount,
-                                     unsigned int _sampleRate);
-
-      /// \brief Fill the SteamAudio audio buffer with data from a sound file.
-      /// \param[in] _audioFile Name and an audio file.
-      public: void FillBufferFromFile(const std::string &_audioFile);
-
-      /// \internal
-      /// \brief Private data pointer
-      private: std::unique_ptr<SteamAudioGeneratorPrivate> dataPtr;
     };
     /// \}
   }

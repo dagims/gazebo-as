@@ -5,12 +5,6 @@ using namespace gazebo;
 GZ_REGISTER_WORLD_PLUGIN(ExportWorldPlugin)
 
 
-///////////////////////////////////////////////////
-std::string ExportWorldPlugin::ShapeType(unsigned int shp_n)
-{
-  return std::string(shape_types[shp_n - 0x10000]);
-}
-
 
 //////////////////////////////////////////////////
 void ExportWorldPlugin::ExportMesh()
@@ -18,6 +12,7 @@ void ExportWorldPlugin::ExportMesh()
   mesh_p = new common::Mesh();
   models_n = this->world_p->ModelCount();
   models_v = this->world_p->Models();
+
   for(int i = 0; i < models_v.size(); i++)
   {
     links_v = models_v[i]->GetLinks();
@@ -106,6 +101,11 @@ void ExportWorldPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
   this->conn_p = event::Events::ConnectWorldUpdateBegin(std::bind(&ExportWorldPlugin::OnUpdate, this));
   this->world_p = _parent;
   this->models_n = this->world_p->ModelCount();
+  
+  this->iaudio = new common::Audio();
+  this->oaudio = new common::Audio(false);
+  this->audioBuffer = (float *)malloc(64*4);
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -120,5 +120,15 @@ void ExportWorldPlugin::OnUpdate()
     this->models_n = models_v.size();
     this->ExportMesh();
   }
+  this->iaudio->ReadFrames(&this->audioBuffer, this->bufferSize);
+  printf("The Buffer Size: %d\n", this->bufferSize);
+  write(1, this->audioBuffer, 64);
+  this->oaudio->WriteFrames(this->audioBuffer, 32);
+}
+
+///////////////////////////////////////////////////
+std::string ExportWorldPlugin::ShapeType(unsigned int shp_n)
+{
+  return std::string(shape_types[shp_n - 0x10000]);
 }
 

@@ -131,27 +131,48 @@ bool SteamAudio::SetSOFA(const std::string &_filename)
 /////////////////////////////////////////////////
 IPLvoid SteamAudio::steamLogCallback(char *msg)
 {
-  printf("STEAMAUDIO LOG: %s\n", msg);
+  gzlog << "STEAMAUDIO LOG: " << msg << "\n";
 }
 
-
 /////////////////////////////////////////////////
-bool SteamAudioListener::SetPose(const ignition::math::Pose3d &_pose)
+IPLVector3 SteamAudio::SetListenerPose(const ignition::math::Pose3d &_pose)
 {
-  VDirection.x = _pose.x();
-  VDirection.y = _pose.y();
-  VDirection.z = _pose.z();
-  iplCalculateRelativeDirection
   //TODO think about the coordinate to be transformed
   //     sourcePosition, listenerPosition,
   //     listenerAhead, listenerUp
+  IPLVector3 listenerp = CalculateRelativeDirection(
+                                IPLVector3{this->generatorPose.Pos().X(),
+                                           this->generatorPose.Pos().Y(),
+                                           this->generatorPose.Pos().Z()},
+                                IPLVector3{_pose.Pos().X(),
+                                           _pose.Pos().Y(),
+                                           _pose.Pos().Z()},
+                                IPLVector3{ 1.0f, 0.0f, 0.0f}, // the x direction as the front of the listener
+                                IPLVector3{ 0.0f, 0.0f, 1.0f}); // the 'up' simply taken as Z
+  this->listenerLocation = ignition::math::Vector3d(listenerp.x, listenerp.y, listenerp.z);
   return true;
+}
+
+/////////////////////////////////////////////////
+std::vector<float> SteamAudio::SteamBinauralEffect(float *_buf, long _bufSize)
+{
+  this->inputAudioBuffer.interleavedBuffer = _buf;
+  // XXX ^ this is just terrible!
+  this->inputAudioBuffer.numSamples = _bufSize;
+  iplApplyBinauralEffect(this->binauralEffect,
+                         this->binauralRenderer,
+                         this->inputAudioBuffer,
+                         this->listenerLocation,
+                         IPL_HRTFINTERPOLATION_NEAREST,
+                         this->outputAudioBuffer);
+  return this->outputAudio;
 }
 
 /////////////////////////////////////////////////
 bool SteamAudioGenerator::IsPlaying()
 {
   // TODO
+  return true;
 }
 
 #endif
