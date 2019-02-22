@@ -45,9 +45,6 @@ namespace gazebo
       /// \brief Constructor.
       public: AudioDecoder();
 
-      /// \brief Constructor for recording.
-      public: AudioDecoder(const std::string &_dev);
-
       /// \brief Destructor.
       public: virtual ~AudioDecoder();
 
@@ -75,11 +72,6 @@ namespace gazebo
       /// \brief Free audio object, close files, streams.
       private: void Cleanup();
 
-      /// \brief Get Frames from Capture
-      /// \param[out] _buf a buffer holding captured data
-      /// \param[out] _numFrames in buffer holding captured data, -1 if error.
-      private: void GetFrames(float **_buf, unsigned long *_numFrames);
-
       /// \brief libav Format I/O context.
       private: AVFormatContext *formatCtx;
 
@@ -97,27 +89,6 @@ namespace gazebo
 
       /// \brief Audio file to decode.
       private: std::string filename;
-
-      /// \brief Audio capture device
-      private: std::string capDevice;
-
-      /// \brief Audio Device Alsa Handle
-      private: snd_pcm_t *deviceHandle;
-
-      /// \brief Audio capture sample rate
-      private: unsigned int sampleRate;
-
-      /// \brief Audio capture frames
-      private: unsigned long audioFrames;
-
-      /// \brief Audio capture data buffer
-      private: float *audioBuffer;
-
-      /// \brief Audio capture data buffer size
-      private: uint32_t bufferSize;
-
-      /// \brief Audio capture indicator
-      private: bool Capture;
     };
     /// \}
   }

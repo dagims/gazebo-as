@@ -33,53 +33,12 @@ AudioDecoder::AudioDecoder()
   this->codecCtx = nullptr;
   this->codec = nullptr;
   this->audioStream = 0;
-  this->Capture = false;
-}
-
-/////////////////////////////////////////////////
-AudioDecoder::AudioDecoder(const std::string &_dev)
-{
-  int ret, dir;
-  unsigned int sample_rate = 44100;
-  snd_pcm_uframes_t frames = 64;
-  snd_pcm_hw_params_t *hw_params;
-
-  ret = snd_pcm_open(&this->deviceHandle, _dev.c_str(), SND_PCM_STREAM_CAPTURE, 0);
-  if(ret < 0)
-  {
-    fprintf(stderr, "Error Opening Capture Device: %s\n", snd_strerror(ret));
-    return;
-  }
-  snd_pcm_hw_params_alloca(&hw_params);
-  snd_pcm_hw_params_any(this->deviceHandle, hw_params);
-  snd_pcm_hw_params_set_format(this->deviceHandle, hw_params, SND_PCM_FORMAT_FLOAT_LE);
-  snd_pcm_hw_params_set_channels(this->deviceHandle, hw_params, 1);
-  snd_pcm_hw_params_set_rate_near(this->deviceHandle, hw_params, &sample_rate, &dir);
-  snd_pcm_hw_params_set_period_size_near(this->deviceHandle, hw_params, &frames, &dir);
-  ret = snd_pcm_hw_params(this->deviceHandle, hw_params);
-  if(ret < 0)
-  {
-    fprintf(stderr, "Error Writing Capture HW Params: %s\n", snd_strerror(ret));
-    return;
-  }
-  this->capDevice = _dev;
-  this->sampleRate = sample_rate;
-  this->audioFrames = frames;
-  this->bufferSize = frames * 4; // b/c FLOAT (4bytes per sec)
-  this->audioBuffer = (float*) malloc(this->bufferSize);
-  this->Capture = true;
 }
 
 /////////////////////////////////////////////////
 AudioDecoder::~AudioDecoder()
 {
   this->Cleanup();
-  if(this->Capture)
-  {
-    snd_pcm_drain(this->deviceHandle);
-    snd_pcm_close(this->deviceHandle);
-    free(this->audioBuffer);
-  }
 }
 
 /////////////////////////////////////////////////
@@ -207,8 +166,6 @@ bool AudioDecoder::Decode(uint8_t ** /*_outBuffer*/,
 /////////////////////////////////////////////////
 int AudioDecoder::GetSampleRate()
 {
-  if(this->Capture)
-    return this->sampleRate;
 #ifdef HAVE_FFMPEG
   return this->codecCtx->sample_rate;
 #else
@@ -331,28 +288,4 @@ bool AudioDecoder::SetFile(const std::string & /*_filename*/)
 std::string AudioDecoder::GetFile() const
 {
   return this->filename;
-}
-
-
-void AudioDecoder::GetFrames(float **_buf, unsigned long *_numFrames)
-{
-  int ret = snd_pcm_readi(this->deviceHandle,
-                          this->audioBuffer,
-                          this->audioFrames);
-  *_numFrames = this->audioFrames;
-  if(ret == -EPIPE) // overrun
-  {
-    snd_pcm_prepare(this->deviceHandle);
-  }
-  else if(ret < 0)
-  {
-    fprintf(stderr, "Error Reading Audio Capture Device: %s\n", snd_strerror(ret));
-    *_numFrames = -1;
-  }
-  else if(ret != this->audioFrames)
-  {
-    fprintf(stderr, "Error: Short Read: %d frames from %lu\n", ret, this->audioFrames);
-    *_numFrames = ret;
-  }
-  memcpy(*_buf, this->audioBuffer, *_numFrames);
 }

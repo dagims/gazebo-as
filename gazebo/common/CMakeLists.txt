@@ -33,6 +33,7 @@ link_directories(${tinyxml_LIBRARY_DIRS})
 set (sources
   Animation.cc
   Assert.cc
+  Audio.cc
   AudioDecoder.cc
   Battery.cc
   Base64.cc
