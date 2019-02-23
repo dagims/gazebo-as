@@ -10,6 +10,8 @@
 #include "gazebo/transport/transport.hh"
 #include "gazebo/msgs/msgs.hh"
 
+#include "gazebo/util/SteamAudio.hh"
+
 
 namespace gazebo
 {
@@ -28,6 +30,7 @@ class GAZEBO_VISIBLE ExportWorldPlugin : public WorldPlugin
   private: common::Mesh *mesh_p;
   private: std::map<uint32_t, std::string> shape_types;
 
+  private: util::SteamAudio *steamAudio;
   private: common::Audio *iaudio;
   private: common::Audio *oaudio;
   private: float *audioBuffer;

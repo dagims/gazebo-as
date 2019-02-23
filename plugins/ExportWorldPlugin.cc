@@ -106,6 +106,7 @@ void ExportWorldPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
   this->oaudio = new common::Audio(false);
   this->audioBuffer = (float *)malloc(64*4);
 
+  //this->steamAudio = util::SteamAudio::Instance();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -122,7 +123,8 @@ void ExportWorldPlugin::OnUpdate()
   }
   this->iaudio->ReadFrames(&this->audioBuffer, this->bufferSize);
   printf("The Buffer Size: %d\n", this->bufferSize);
-  write(1, this->audioBuffer, 64);
+  
+  //write(1, this->audioBuffer, 64);
   this->oaudio->WriteFrames(this->audioBuffer, 32);
 }
 

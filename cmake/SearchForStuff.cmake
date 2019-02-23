@@ -450,6 +450,39 @@ if (PKG_CONFIG_FOUND)
   #   set (HAVE_OPENAL TRUE)
   # endif ()
 
+
+  ########################################
+  # Steam Audio
+  set(STEAMAUDIO_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/deps/steamaudio/include" )
+  set (HAVE_STEAMAUDIO ON )
+  # TODO check if libav is available and that the audio decoder will be built into 
+  #      the util package
+  if (WIN32)
+     if (MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+      set (STEAMAUDIO_LIBRARY "${CMAKE_SOURCE_DIR}/deps/steamaudio/lib/Windows/x64/phonon.lib"  )
+        message(STATUS "Steam Audio For Win32 x64")
+     else(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set (STEAMAUDIO_LIBRARY "${CMAKE_SOURCE_DIR}/deps/steamaudio/lib/Windows/x86/phonon.lib"  )
+        message(STATUS "Steam Audio For Win32 x86")
+     endif(MSVC AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+
+  elseif(APPLE)
+     set (STEAMAUDIO_LIBRARY "${CMAKE_SOURCE_DIR}/deps/steamaudio/lib/OSX/libphonon.dylib"  )
+     message(STATUS "Steam Audio For Apple")
+
+  elseif(UNIX)
+     if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+        set (HAVE_STEAMAUDIO ON )
+        message(STATUS "Steam Audio For Linux x64")
+        set (STEAMAUDIO_LIBRARY "${CMAKE_SOURCE_DIR}/deps/steamaudio/lib/Linux/x64/libphonon.so"  )
+     else(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+        set (STEAMAUDIO_LIBRARY "${CMAKE_SOURCE_DIR}/deps/steamaudio/lib/Linux/x86/libphonon.so"  )
+        message(STATUS "Steam Audio For Linux x86")
+     endif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+  endif()
+
+
+
   ########################################
   # Find libswscale format
   pkg_check_modules(libswscale libswscale)

@@ -49,6 +49,7 @@
 
 #include "gazebo/util/IntrospectionManager.hh"
 #include "gazebo/util/OpenAL.hh"
+#include "gazebo/util/SteamAudio.hh"
 #include "gazebo/util/UtilTypes.hh"
 
 /// \brief Private data for the Link class
@@ -119,6 +120,10 @@ class gazebo::physics::LinkPrivate
       /// playback.
       public: transport::SubscriberPtr audioContactsSub;
 #endif
+
+  public: util::SteamAudioPtr steamaud;
+  public: bool steamGenerator;
+  public: bool steamListener;
 };
 
 using namespace gazebo;
@@ -133,6 +138,9 @@ Link::Link(EntityPtr _parent)
   this->dataPtr->parentJoints.clear();
   this->dataPtr->childJoints.clear();
   this->dataPtr->publishDataMutex = new std::recursive_mutex();
+
+  this->dataPtr->steamGenerator = false;
+  this->dataPtr->steamListener = false;
 }
 
 //////////////////////////////////////////////////
@@ -293,6 +301,15 @@ void Link::Load(sdf::ElementPtr _sdf)
       this, std::placeholders::_1)));
 
   this->SetStatic(this->IsStatic());
+
+  if (_sdf->HasElement("audio_generator"))
+  {
+    this->dataPtr->steamGenerator = true;
+  }
+  else if (_sdf->HasElement("audio_listener"))
+  {
+    this->dataPtr->steamListener = true;
+  }
 }
 
 //////////////////////////////////////////////////
@@ -581,6 +598,7 @@ void Link::SetLaserRetro(float _retro)
 //////////////////////////////////////////////////
 void Link::Update(const common::UpdateInfo & /*_info*/)
 {
+  
 #ifdef HAVE_OPENAL
   if (this->dataPtr->audioSink)
   {
@@ -625,6 +643,11 @@ void Link::Update(const common::UpdateInfo & /*_info*/)
   {
     battery->Update();
   }
+
+  if(this->dataPtr->steamGenerator)
+    util::SteamAudio::Instance()->SetGeneratorPose(this->WorldPose());
+  if(this->dataPtr->steamListener)
+    util::SteamAudio::Instance()->SetListenerPose(this->WorldPose());
 }
 
 //////////////////////////////////////////////////

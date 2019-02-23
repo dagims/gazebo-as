@@ -1,5 +1,7 @@
 include (${gazebo_cmake_dir}/GazeboUtils.cmake)
 
+include_directories(${STEAMAUDIO_INCLUDE_DIR})
+
 link_directories(
   ${CCD_LIBRARY_DIRS}
   ${Boost_LIBRARY_DIRS}
@@ -163,6 +165,7 @@ target_link_libraries(gazebo_physics
   gazebo_opcode
   ${Boost_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
+  ${STEAMAUDIO_LIBRARY}
 )
 
 # Link in Bullet support if present

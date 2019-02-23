@@ -36,7 +36,7 @@ using namespace util;
 /////////////////////////////////////////////////
 SteamAudio::SteamAudio()
 {
-  this->SOFAFILE = "";
+  this->SOFAfile = "";
   iplCreateContext(steamLogCallback, nullptr, nullptr, &this->context);
 }
 
@@ -97,8 +97,6 @@ SteamAudio::initSteamAudio()
 /////////////////////////////////////////////////
 bool SteamAudio::Load(sdf::ElementPtr _sdf)
 {
-  std::string deviceName = "default";
-
   return true;
 }
 
@@ -135,7 +133,13 @@ IPLvoid SteamAudio::steamLogCallback(char *msg)
 }
 
 /////////////////////////////////////////////////
-IPLVector3 SteamAudio::SetListenerPose(const ignition::math::Pose3d &_pose)
+void SteamAudio::SetGeneratorPose(const ignition::math::Pose3d &_pose)
+{
+  this->generatorPose = _pose;
+}
+
+/////////////////////////////////////////////////
+void SteamAudio::SetListenerPose(const ignition::math::Pose3d &_pose)
 {
   //TODO think about the coordinate to be transformed
   //     sourcePosition, listenerPosition,
@@ -150,7 +154,6 @@ IPLVector3 SteamAudio::SetListenerPose(const ignition::math::Pose3d &_pose)
                                 IPLVector3{ 1.0f, 0.0f, 0.0f}, // the x direction as the front of the listener
                                 IPLVector3{ 0.0f, 0.0f, 1.0f}); // the 'up' simply taken as Z
   this->listenerLocation = ignition::math::Vector3d(listenerp.x, listenerp.y, listenerp.z);
-  return true;
 }
 
 /////////////////////////////////////////////////

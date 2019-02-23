@@ -34,6 +34,7 @@ namespace gazebo
     class DiagnosticTimer;
     class OpenALSink;
     class OpenALSource;
+    class SteamAudio;
 
     /// \def DiagnosticTimerPtr
     /// \brief std::shared_ptr to a DiagnosticTimer class
@@ -50,6 +51,8 @@ namespace gazebo
     /// \def TimerMap
     /// \brief Map of all the active timers.
     typedef std::unordered_map<std::string, DiagnosticTimerPtr> TimerMap;
+
+	 typedef std::shared_ptr<SteamAudio> SteamAudioPtr;
   }
 }
 /// \}

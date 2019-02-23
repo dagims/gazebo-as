@@ -29,7 +29,11 @@
 #include <ignition/math/Pose3.hh>
 
 #include "gazebo/common/SingletonT.hh"
+#include "gazebo/common/common.hh"
 #include "gazebo/util/UtilTypes.hh"
+
+#include "gazebo/physics/physics.hh"
+#include "gazebo/physics/PhysicsTypes.hh"
 
 #include "gazebo/gazebo_config.h"
 #include "gazebo/util/system.hh"
@@ -62,15 +66,13 @@ namespace gazebo
 
       /// \brief Specify Audio Generator link
       /// Only one generator may be created
-      /// \param[in] _sdf SDF element parameters for an audio_generator
-      /// \return A pointer to an SteamAudioGenerator object.
-      public: void GeneratorLink(sdf::ElementPtr _sdf);
+      /// \param[in] LinkPtr to  audio_generator link
+      public: void GeneratorLink(physics::LinkPtr _genLink);
 
       /// \brief Specify audio listener link.
       /// Only one listener may be created.
-      /// \param[in] _sdf SDF element parameters for an audio_listener
-      /// \return A pointer to an SteamAudioListener object.
-      public: void ListenerLink (sdf::ElementPtr _sdf);
+      /// \param[in] LinkPtr to listener link
+      public: void ListenerLink (physics::LinkPtr _lisLink);
 
       /// \brief Get a list of available audio devices
       /// \return A list of audio device names

@@ -9,6 +9,7 @@ include_directories(SYSTEM
   ${SDFormat_INCLUDE_DIRS}
   ${OGRE_INCLUDE_DIRS}
   ${Qt5Core_INCLUDE_DIRS}
+  ${STEAMAUDIO_INCLUDE_DIR}
 )
 
 # Tinyxml are used since the plugins are linking against gazebo_common
