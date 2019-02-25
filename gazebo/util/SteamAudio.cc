@@ -31,13 +31,25 @@
 using namespace gazebo;
 using namespace util;
 
-#ifdef HAVE_STEAMAUDIO
+
+/////////////////////////////////////////////////
+extern "C" {
+  IPLvoid steamLogCallback(char *msg);
+};
+  
+IPLvoid steamLogCallback(char *msg)
+{
+  gzlog << "STEAMAUDIO LOG: " << msg << "\n";
+}
 
 /////////////////////////////////////////////////
 SteamAudio::SteamAudio()
 {
   this->SOFAfile = "";
   iplCreateContext(steamLogCallback, nullptr, nullptr, &this->context);
+  // TODO these params are static for now
+  //      can only support 44100 and 64
+  this->Init();
 }
 
 /////////////////////////////////////////////////
@@ -47,49 +59,44 @@ SteamAudio::~SteamAudio()
 }
 
 /////////////////////////////////////////////////
-SteamAudio::initSteamAudio()
+void SteamAudio::Init()
 {
   // TODO these params are static for now
   //      can only support 44100 and 64
   unsigned int sample_rate = 44100;
-  unsigned int frames = 32;
+  unsigned int frames = 64;
   IPLHrtfParams hrtfParams{ IPL_HRTFDATABASETYPE_DEFAULT, nullptr, nullptr};
   if (this->SOFAfile.size() != 0)
   {
     hrtfParams.type = IPL_HRTFDATABASETYPE_SOFA;
-    hrtfParams.sofaFileName = this->SOFAfile.c_str();
+    strcpy(hrtfParams.sofaFileName, this->SOFAfile.c_str());
   }
   IPLRenderingSettings settings { sample_rate, frames };
-  IPLAudioFormat mono{IPL_CHANNELLAYOUTTYPE_SPEAKERS,
-                      IPL_CHANNELLAYOUT_MONO,
-                      1,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      IPL_CHANNELORDER_INTERLEAVED};
-  IPLAudioFormat stereo{IPL_CHANNELLAYOUTTYPE_SPEAKERS,
-                      IPL_CHANNELLAYOUT_STEREO,
-                      2,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      nullptr,
-                      IPL_CHANNELORDER_INTERLEAVED};
+  IPLAudioFormat mono;
+  mono.channelLayoutType = IPL_CHANNELLAYOUTTYPE_SPEAKERS;
+  mono.channelLayout = IPL_CHANNELLAYOUT_MONO;
+  mono.numSpeakers = 1;
+  mono.channelOrder = IPL_CHANNELORDER_INTERLEAVED;
+
+  IPLAudioFormat stereo;
+  stereo.channelLayoutType = IPL_CHANNELLAYOUTTYPE_SPEAKERS;
+  stereo.channelLayout = IPL_CHANNELLAYOUT_STEREO;
+  stereo.numSpeakers = 1;
+  stereo.channelOrder = IPL_CHANNELORDER_INTERLEAVED;
 
   iplCreateBinauralRenderer(this->context, settings, hrtfParams, &this->binauralRenderer);
   iplCreateBinauralEffect(this->binauralRenderer, mono, stereo, &this->binauralEffect);
 
   this->inputAudio.clear();
   this->inputAudioBuffer.format = mono;
-  this->inputAudioBuffer.numSamples = sample_rate;
+  this->inputAudioBuffer.numSamples = frames;
   this->inputAudioBuffer.interleavedBuffer = this->inputAudio.data();
   this->inputAudioBuffer.deinterleavedBuffer = nullptr;
 
   this->outputAudio.clear();
   this->outputAudio.insert(this->outputAudio.begin(), frames*2, 0); 
   this->outputAudioBuffer.format = stereo;
-  this->outputAudioBuffer.numSamples = sample_rate;
+  this->outputAudioBuffer.numSamples = frames;
   this->outputAudioBuffer.interleavedBuffer = this->outputAudio.data();
   this->outputAudioBuffer.deinterleavedBuffer = nullptr;
 }
@@ -127,12 +134,6 @@ bool SteamAudio::SetSOFA(const std::string &_filename)
 }
 
 /////////////////////////////////////////////////
-IPLvoid SteamAudio::steamLogCallback(char *msg)
-{
-  gzlog << "STEAMAUDIO LOG: " << msg << "\n";
-}
-
-/////////////////////////////////////////////////
 void SteamAudio::SetGeneratorPose(const ignition::math::Pose3d &_pose)
 {
   this->generatorPose = _pose;
@@ -144,7 +145,7 @@ void SteamAudio::SetListenerPose(const ignition::math::Pose3d &_pose)
   //TODO think about the coordinate to be transformed
   //     sourcePosition, listenerPosition,
   //     listenerAhead, listenerUp
-  IPLVector3 listenerp = CalculateRelativeDirection(
+  IPLVector3 listenerp = iplCalculateRelativeDirection(
                                 IPLVector3{this->generatorPose.Pos().X(),
                                            this->generatorPose.Pos().Y(),
                                            this->generatorPose.Pos().Z()},
@@ -159,23 +160,16 @@ void SteamAudio::SetListenerPose(const ignition::math::Pose3d &_pose)
 /////////////////////////////////////////////////
 std::vector<float> SteamAudio::SteamBinauralEffect(float *_buf, long _bufSize)
 {
-  this->inputAudioBuffer.interleavedBuffer = _buf;
-  // XXX ^ this is just terrible!
-  this->inputAudioBuffer.numSamples = _bufSize;
+  this->inputAudio = std::vector<float>(_buf, _buf+64);
+  this->inputAudioBuffer.interleavedBuffer = this->inputAudio.data();
   iplApplyBinauralEffect(this->binauralEffect,
                          this->binauralRenderer,
                          this->inputAudioBuffer,
-                         this->listenerLocation,
+                         IPLVector3{this->listenerLocation.X(),
+                                    this->listenerLocation.Y(),
+                                    this->listenerLocation.Z()},
                          IPL_HRTFINTERPOLATION_NEAREST,
                          this->outputAudioBuffer);
   return this->outputAudio;
 }
 
-/////////////////////////////////////////////////
-bool SteamAudioGenerator::IsPlaying()
-{
-  // TODO
-  return true;
-}
-
-#endif

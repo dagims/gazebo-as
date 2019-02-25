@@ -454,7 +454,7 @@ if (PKG_CONFIG_FOUND)
   ########################################
   # Steam Audio
   set(STEAMAUDIO_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/deps/steamaudio/include" )
-  set (HAVE_STEAMAUDIO ON )
+  set (HAVE_STEAMAUDIO OFF )
   # TODO check if libav is available and that the audio decoder will be built into 
   #      the util package
   if (WIN32)

@@ -32,13 +32,9 @@
 #include "gazebo/common/common.hh"
 #include "gazebo/util/UtilTypes.hh"
 
-#include "gazebo/physics/physics.hh"
-#include "gazebo/physics/PhysicsTypes.hh"
-
 #include "gazebo/gazebo_config.h"
 #include "gazebo/util/system.hh"
 
-#ifdef HAVE_STEAMAUDIO
 
 namespace gazebo
 {
@@ -64,20 +60,13 @@ namespace gazebo
       /// \brief Finalize.
       public: void Fini();
 
-      /// \brief Specify Audio Generator link
-      /// Only one generator may be created
-      /// \param[in] LinkPtr to  audio_generator link
-      public: void GeneratorLink(physics::LinkPtr _genLink);
-
-      /// \brief Specify audio listener link.
-      /// Only one listener may be created.
-      /// \param[in] LinkPtr to listener link
-      public: void ListenerLink (physics::LinkPtr _lisLink);
-
       /// \brief Get a list of available audio devices
       /// \return A list of audio device names
       public: std::set<std::string> DeviceList() const;
 
+      /// \brief Initialize SteamAudio
+      private: void Init();
+      
       /// \brief Set the SOFA file
       /// \param[in] The URI of the SOFA file
       /// \return True if the file was successfully loaded
@@ -95,17 +84,11 @@ namespace gazebo
       /// \param[in] World Pose of the Audio Generator Link
       public: void SetGeneratorPose(const ignition::math::Pose3d &_pose);
 
-      /// \internal
-      /// \brief Callback for log messages from SteamAudio
-      private: IPLvoid steamLogCallback(char *msg);
-
-      /// \internal
-      /// \brief Audio Input object
-      private: physics::LinkPtr audioGenerator;
-
-      /// \internal
-      /// \brief Audio Input object
-      private: physics::LinkPtr audioListener;
+      /// \brief Apply binaural effect
+      /// \param[in] _buf input audio
+      /// \param[in] _bufSize number of samples in buffer
+      /// \return std::vector<float> of the output audio
+      std::vector<float> SteamBinauralEffect(float *_buf, long _bufSize);
 
       /// \internal
       /// \brief Audio Generator Pose
@@ -169,5 +152,4 @@ namespace gazebo
     /// \}
   }
 }
-#endif
 #endif

@@ -106,7 +106,7 @@ void ExportWorldPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
   this->oaudio = new common::Audio(false);
   this->audioBuffer = (float *)malloc(64*4);
 
-  //this->steamAudio = util::SteamAudio::Instance();
+  this->steamAudio = util::SteamAudio::Instance();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -122,10 +122,14 @@ void ExportWorldPlugin::OnUpdate()
     this->ExportMesh();
   }
   this->iaudio->ReadFrames(&this->audioBuffer, this->bufferSize);
-  printf("The Buffer Size: %d\n", this->bufferSize);
   
-  //write(1, this->audioBuffer, 64);
-  this->oaudio->WriteFrames(this->audioBuffer, 32);
+  this->resAudio = this->steamAudio->SteamBinauralEffect(this->audioBuffer, 64);
+  
+  std::vector<float> temp_buf(this->audioBuffer, this->audioBuffer+64);
+  this->thee_audio.insert(this->thee_audio.end(), this->resAudio.begin(),
+  this->resAudio.end());
+  common::Audio::AudioIOStatusCode r =
+  this->oaudio->WriteFrames(this->resAudio.data(), 64);
 }
 
 ///////////////////////////////////////////////////

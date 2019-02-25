@@ -39,6 +39,7 @@
 #cmakedefine USE_EXTERNAL_TINYXML2 1
 #cmakedefine HAVE_OSVR 1
 #cmakedefine HAVE_IGNITION_FUEL_TOOLS 1
+#cmakedefine HAVE_STEAMAUDIO 1
 
 #ifdef GAZEBO_BUILD_TYPE_PROFILE
 #include <gperftools/heap-checker.h>

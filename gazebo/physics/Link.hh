@@ -38,7 +38,6 @@
 #include "gazebo/physics/Inertial.hh"
 #include "gazebo/physics/Joint.hh"
 #include "gazebo/util/system.hh"
-#include "gazebo/util/SteamAudio.hh"
 
 namespace gazebo
 {
