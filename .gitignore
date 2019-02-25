@@ -9,3 +9,4 @@ Ogre.log
 *.orig
 *.gch
 *.pch
+.vimrc

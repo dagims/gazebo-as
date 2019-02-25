@@ -33,6 +33,7 @@ link_directories(${tinyxml_LIBRARY_DIRS})
 set (sources
   Animation.cc
   Assert.cc
+  Audio.cc
   AudioDecoder.cc
   Battery.cc
   Base64.cc
@@ -88,6 +89,7 @@ endif()
 set (headers
   Animation.hh
   Assert.hh
+  Audio.hh
   AudioDecoder.hh
   Battery.hh
   Base64.hh
@@ -278,6 +280,10 @@ endif()
 
 if (HAVE_OPENAL)
   target_link_libraries(gazebo_common ${OPENAL_LIBRARY})
+endif()
+
+if (HAVE_ALSA)
+  target_link_libraries(gazebo_common ${ALSA_LIBRARIES})
 endif()
 
 if (HAVE_GDAL)

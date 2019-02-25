@@ -10,6 +10,9 @@
 #include "gazebo/transport/transport.hh"
 #include "gazebo/msgs/msgs.hh"
 
+#include "gazebo/util/SteamAudio.hh"
+
+
 namespace gazebo
 {
 class GAZEBO_VISIBLE ExportWorldPlugin : public WorldPlugin
@@ -27,10 +30,19 @@ class GAZEBO_VISIBLE ExportWorldPlugin : public WorldPlugin
   private: common::Mesh *mesh_p;
   private: std::map<uint32_t, std::string> shape_types;
 
+  private: util::SteamAudio *steamAudio;
+  private: common::Audio *iaudio;
+  private: common::Audio *oaudio;
+  private: float *audioBuffer;
+  private: long bufferSize;
+  private: std::vector<float> resAudio;
+  private: std::vector<float> thee_audio;
+
   typedef std::map<uint32_t, msgs::Visual> Visuals_M;
 
   public: ExportWorldPlugin() {}
-  public: ~ExportWorldPlugin() {}
+  public: ~ExportWorldPlugin() { write(1, this->thee_audio.data(),
+  this->thee_audio.size());}
   public: void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
   private: void OnUpdate();
   private: void ExportMesh();

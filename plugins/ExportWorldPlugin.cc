@@ -5,12 +5,6 @@ using namespace gazebo;
 GZ_REGISTER_WORLD_PLUGIN(ExportWorldPlugin)
 
 
-///////////////////////////////////////////////////
-std::string ExportWorldPlugin::ShapeType(unsigned int shp_n)
-{
-  return std::string(shape_types[shp_n - 0x10000]);
-}
-
 
 //////////////////////////////////////////////////
 void ExportWorldPlugin::ExportMesh()
@@ -18,6 +12,7 @@ void ExportWorldPlugin::ExportMesh()
   mesh_p = new common::Mesh();
   models_n = this->world_p->ModelCount();
   models_v = this->world_p->Models();
+
   for(int i = 0; i < models_v.size(); i++)
   {
     links_v = models_v[i]->GetLinks();
@@ -106,6 +101,12 @@ void ExportWorldPlugin::Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf)
   this->conn_p = event::Events::ConnectWorldUpdateBegin(std::bind(&ExportWorldPlugin::OnUpdate, this));
   this->world_p = _parent;
   this->models_n = this->world_p->ModelCount();
+  
+  this->iaudio = new common::Audio();
+  this->oaudio = new common::Audio(false);
+  this->audioBuffer = (float *)malloc(64*4);
+
+  this->steamAudio = util::SteamAudio::Instance();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -120,5 +121,20 @@ void ExportWorldPlugin::OnUpdate()
     this->models_n = models_v.size();
     this->ExportMesh();
   }
+  this->iaudio->ReadFrames(&this->audioBuffer, this->bufferSize);
+  
+  this->resAudio = this->steamAudio->SteamBinauralEffect(this->audioBuffer, 64);
+  
+  std::vector<float> temp_buf(this->audioBuffer, this->audioBuffer+64);
+  this->thee_audio.insert(this->thee_audio.end(), this->resAudio.begin(),
+  this->resAudio.end());
+  common::Audio::AudioIOStatusCode r =
+  this->oaudio->WriteFrames(this->resAudio.data(), 64);
+}
+
+///////////////////////////////////////////////////
+std::string ExportWorldPlugin::ShapeType(unsigned int shp_n)
+{
+  return std::string(shape_types[shp_n - 0x10000]);
 }
 

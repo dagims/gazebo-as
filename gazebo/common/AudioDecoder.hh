@@ -22,6 +22,10 @@
 #include <string>
 #include "gazebo/util/system.hh"
 
+//newer alsa api
+#define ALSA_PCM_NEW_HW_PARAMS_API
+#include <alsa/asoundlib.h>
+
 struct AVFormatContext;
 struct AVCodecContext;
 struct AVCodec;

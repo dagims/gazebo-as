@@ -6,10 +6,14 @@ if (HAVE_OPENAL)
   include_directories(${OPENAL_INCLUDE_DIR})
 endif()
 
+message(STATUS "************************************" ${STEAMAUDIO_INCLUDE_DIR})
+message(STATUS "************************************" ${STEAMAUDIO_LIBRARY})
+
 include_directories(${TBB_INCLUDEDIR}
                     ${tinyxml_INCLUDE_DIRS}
                     ${tinyxml2_INCLUDE_DIRS}
-                    ${IGNITION-TRANSPORT_INCLUDE_DIRS})
+                    ${IGNITION-TRANSPORT_INCLUDE_DIRS}
+						  ${STEAMAUDIO_INCLUDE_DIR})
 
 link_directories(${tinyxml2_LIBRARY_DIRS} ${IGNITION-MSGS_LIBRARY_DIRS})
 
@@ -21,6 +25,7 @@ set (sources
   LogPlay.cc
   LogRecord.cc
   OpenAL.cc
+  SteamAudio.cc
 )
 
 if (NOT USE_EXTERNAL_TINYXML2)
@@ -43,6 +48,7 @@ set (headers
   LogPlay.hh
   LogRecord.hh
   OpenAL.hh
+  SteamAudio.hh
   UtilTypes.hh
   system.hh
 )
@@ -87,6 +93,7 @@ target_link_libraries(gazebo_util
   ${tinyxml2_LIBRARIES}
   ${IGNITION-TRANSPORT_LIBRARIES}
   ${IGNITION-MSGS_LIBRARIES}
+  ${STEAMAUDIO_LIBRARY}
 )
 
 # define if tinxml2 major version >= 6
