@@ -309,6 +309,11 @@ void Link::Load(sdf::ElementPtr _sdf)
   else if (_sdf->HasElement("audio_listener"))
   {
     this->dataPtr->steamListener = true;
+    sdf::ElementPtr audioListenElem = _sdf->GetElement("audio_listener");
+    if (audioListenElem && audioListenElem->HasElement("sofa"))
+    {
+      util::SteamAudio::Instance()->SetSOFA(audioListenElem->Get<std::string>("sofa"));
+    }
   }
 }
 
@@ -645,9 +650,13 @@ void Link::Update(const common::UpdateInfo & /*_info*/)
   }
 
   if(this->dataPtr->steamGenerator)
+  {
     util::SteamAudio::Instance()->SetGeneratorPose(this->WorldPose());
+  }
   if(this->dataPtr->steamListener)
+  {
     util::SteamAudio::Instance()->SetListenerPose(this->WorldPose());
+  }
 }
 
 //////////////////////////////////////////////////

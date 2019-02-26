@@ -4,7 +4,12 @@ using namespace gazebo;
 
 GZ_REGISTER_WORLD_PLUGIN(ExportWorldPlugin)
 
-
+ExportWorldPlugin::~ExportWorldPlugin()
+{
+  std::ofstream ofile("outputaudio.raw", std::ios::binary);
+  ofile.write((char *)this->thee_audio.data(),
+              this->thee_audio.size()*sizeof(float));
+}
 
 //////////////////////////////////////////////////
 void ExportWorldPlugin::ExportMesh()

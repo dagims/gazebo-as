@@ -48,6 +48,9 @@
           </geometry>
         </visual>
         <audio_listener />
+        <!-- audio_listener>
+          <sofa>ABSOLUTE PATH TO SOFA FILE</sofa>
+        </audio_listener -->
       </link>
     </model>
 

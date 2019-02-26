@@ -41,8 +41,7 @@ class GAZEBO_VISIBLE ExportWorldPlugin : public WorldPlugin
   typedef std::map<uint32_t, msgs::Visual> Visuals_M;
 
   public: ExportWorldPlugin() {}
-  public: ~ExportWorldPlugin() { write(1, this->thee_audio.data(),
-  this->thee_audio.size());}
+  public: ~ExportWorldPlugin();
   public: void Load(physics::WorldPtr _parent, sdf::ElementPtr _sdf);
   private: void OnUpdate();
   private: void ExportMesh();
