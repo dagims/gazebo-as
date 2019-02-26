@@ -69,8 +69,7 @@ namespace gazebo
       
       /// \brief Set the SOFA file
       /// \param[in] The URI of the SOFA file
-      /// \return True if the file was successfully loaded
-      public: bool SetSOFA(const std::string &_filename);
+      public: void SetSOFA(const std::string &_filename);
 
       /// \brief Get url of the SOFA file
       /// \return The URI of the SOFA file, empty if none loaded
@@ -88,7 +87,7 @@ namespace gazebo
       /// \param[in] _buf input audio
       /// \param[in] _bufSize number of samples in buffer
       /// \return std::vector<float> of the output audio
-      std::vector<float> SteamBinauralEffect(float *_buf, long _bufSize);
+      public: std::vector<float> SteamBinauralEffect(float *_buf, long _bufSize);
 
       /// \internal
       /// \brief Audio Generator Pose
@@ -144,7 +143,7 @@ namespace gazebo
 
       /// \internal
       /// \brief SOFA file
-      private: std::string SOFAfile;
+      private: char *SOFAfile;
 
       /// \brief This is a singleton
       private: friend class SingletonT<SteamAudio>;
