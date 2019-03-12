@@ -45,7 +45,7 @@ IPLvoid steamLogCallback(char *msg)
 /////////////////////////////////////////////////
 SteamAudio::SteamAudio()
 {
-  this->SOFAfile = nullptr;
+  this->SOFAfile = "";
   iplCreateContext(steamLogCallback, nullptr, nullptr, &this->context);
   this->Init();
 }
@@ -64,12 +64,14 @@ void SteamAudio::Init()
   IPLint32 sample_rate = 44100;
   IPLint32 frames = 64;
   IPLHrtfParams hrtfParams;
-  if(this->SOFAfile != nullptr) {
+  if(this->SOFAfile.size() != 0)
+  {
     hrtfParams.type = IPL_HRTFDATABASETYPE_SOFA;
     hrtfParams.hrtfData = nullptr;
-    hrtfParams.sofaFileName = this->SOFAfile;
+    hrtfParams.sofaFileName = strdup(this->SOFAfile.c_str());
   }
-  else {
+  else
+  {
     hrtfParams.type = IPL_HRTFDATABASETYPE_DEFAULT;
     hrtfParams.hrtfData = nullptr;
     hrtfParams.sofaFileName = nullptr;
@@ -121,8 +123,7 @@ void SteamAudio::SetSOFA(const std::string &_filename)
   // not checking for sofa file existence or validity
   // because if the file is invalid, phonon will revert
   // back to default hrtf itself - no harm.
-  this->SOFAfile = new char[_filename.size()];
-  strcpy(this->SOFAfile, _filename.data());
+  this->SOFAfile = common::find_file(_filename);
   this->binauralEffect = nullptr;
   this->binauralRenderer = nullptr;
   iplDestroyBinauralEffect(&this->binauralEffect);
@@ -139,9 +140,10 @@ void SteamAudio::SetGeneratorPose(const ignition::math::Pose3d &_pose)
 /////////////////////////////////////////////////
 void SteamAudio::SetListenerPose(const ignition::math::Pose3d &_pose)
 {
-  //TODO think about the coordinate to be transformed
-  //     sourcePosition, listenerPosition,
-  //     listenerAhead, listenerUp
+  ignition::math::Vector3d listenerAheadVec = 
+             _pose.Rot().RotateVector(ignition::math::Vector3d(1.0, 0.0, 0.0));
+  ignition::math::Vector3d generatorUpVec = 
+             _pose.Rot().RotateVector(ignition::math::Vector3d(0.0, 0.0, 1.0));
   IPLVector3 listenerp = iplCalculateRelativeDirection(
                                 IPLVector3{(float)this->generatorPose.Pos().X(),
                                            (float)this->generatorPose.Pos().Y(),
@@ -149,8 +151,13 @@ void SteamAudio::SetListenerPose(const ignition::math::Pose3d &_pose)
                                 IPLVector3{(float)_pose.Pos().X(),
                                            (float)_pose.Pos().Y(),
                                            (float)_pose.Pos().Z()},
-                                IPLVector3{ 1.0f, 0.0f, 0.0f}, // the x direction as the front of the listener
-                                IPLVector3{ 0.0f, 0.0f, 1.0f}); // the 'up' simply taken as Z
+                                IPLVector3{(float)listenerAheadVec.X(),
+                                           (float)listenerAheadVec.Y(),
+                                           (float)listenerAheadVec.Z()},
+                                IPLVector3{(float)generatorUpVec.X(),
+                                           (float)generatorUpVec.Y(),
+                                           (float)generatorUpVec.Z()});
+                                
   this->listenerLocation = ignition::math::Vector3d(listenerp.x, listenerp.y, listenerp.z);
 }
 

@@ -143,7 +143,7 @@ namespace gazebo
 
       /// \internal
       /// \brief SOFA file
-      private: char *SOFAfile;
+      private: std::string SOFAfile;
 
       /// \brief This is a singleton
       private: friend class SingletonT<SteamAudio>;
