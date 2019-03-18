@@ -20,6 +20,7 @@ void ExportWorldPlugin::ExportMesh()
 
   for(int i = 0; i < models_v.size(); i++)
   {
+          printf("ahhahah\n");
     links_v = models_v[i]->GetLinks();
     if(mesh_m->HasMesh(models_v[i]->GetName()))
       mesh_m->RemoveMesh(models_v[i]->GetName());
@@ -75,6 +76,16 @@ void ExportWorldPlugin::ExportMesh()
                               ignition::math::Vector2d(1, 1),
                               ignition::math::Vector2d(1, 1), submesh_p);
           submesh_p->Center(links_v[j]->WorldPose().Pos());
+          std::cout<<"Vertices: "<<std::endl;
+          for(int jkl = 0; jkl < submesh_p->GetVertexCount(); jkl++)
+          {
+            std::cout<<submesh_p->Vertex(jkl)<<std::endl;
+          }
+          std::cout<<"Indices: "<<std::endl;
+          for(int jkl = 0; jkl < submesh_p->GetIndexCount(); jkl++)
+          {
+            std::cout<<submesh_p->GetIndex(jkl)<<std::endl;
+          }
           mesh_p->AddSubMesh(submesh_p);
          }
         else if(strcmp(ShapeType(collisions_v[k]->GetShapeType()).c_str(), "sphere") == 0)

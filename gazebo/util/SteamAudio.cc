@@ -46,6 +46,18 @@ IPLvoid steamLogCallback(char *msg)
 SteamAudio::SteamAudio()
 {
   this->SOFAfile = "";
+  this->materialAcousticProp["generic"] = IPLMaterial{0.10f,0.20f,0.30f,0.05f,0.100f,0.050f,0.030f};
+  this->materialAcousticProp["brick"] = IPLMaterial{0.03f,0.04f,0.07f,0.05f,0.015f,0.015f,0.015f};
+  this->materialAcousticProp["concrete"] = IPLMaterial{0.05f,0.07f,0.08f,0.05f,0.015f,0.002f,0.001f};
+  this->materialAcousticProp["ceramic"] = IPLMaterial{0.01f,0.02f,0.02f,0.05f,0.060f,0.044f,0.011f};
+  this->materialAcousticProp["gravel"] = IPLMaterial{0.60f,0.70f,0.80f,0.05f,0.031f,0.012f,0.008f};
+  this->materialAcousticProp["carpet"] = IPLMaterial{0.24f,0.69f,0.73f,0.05f,0.020f,0.005f,0.003f};
+  this->materialAcousticProp["glass"] = IPLMaterial{0.06f,0.03f,0.02f,0.05f,0.060f,0.044f,0.011f};
+  this->materialAcousticProp["plaster"] = IPLMaterial{0.12f,0.06f,0.04f,0.05f,0.056f,0.056f,0.004f};
+  this->materialAcousticProp["wood"] = IPLMaterial{0.11f,0.07f,0.06f,0.05f,0.070f,0.014f,0.005f};
+  this->materialAcousticProp["metal"] = IPLMaterial{0.20f,0.07f,0.06f,0.05f,0.200f,0.025f,0.010f};
+  this->materialAcousticProp["rock"] = IPLMaterial{0.13f,0.20f,0.24f,0.05f,0.015f,0.002f,0.001f};
+
   iplCreateContext(steamLogCallback, nullptr, nullptr, &this->context);
   this->Init();
 }
@@ -55,6 +67,36 @@ SteamAudio::~SteamAudio()
 {
   this->Fini();
 }
+
+/////////////////////////////////////////////////
+bool SteamAudio::Load(sdf::ElementPtr _sdf)
+{
+  if(!_sdf->HasElement("acoustic"))
+    return false;
+
+  sdf::ElementPtr acousticElem = _sdf->GetElement("acoustic");
+  printf("Acoustic!!!!!!!!!!!!!!!!!!!\n");
+  if(acousticElem->HasElement("material"))
+    this->materialName.push_back(acousticElem->Get<std::string>("material"));
+  if(acousticElem->HasElement("properties"))
+  {
+    sdf::ElementPtr propElem = acousticElem->GetElement("properties");
+    if(propElem->HasElement("lowFrequencyAbsorption"))
+    {
+      this->materialProperties.push_back(IPLMaterial{propElem->Get<double>("lowFrequencyAbsorption"),
+                                                     propElem->Get<double>("midFrequencyAbsorption"),
+                                                     propElem->Get<double>("highFrequencyAbsorption"),
+                                                     propElem->Get<double>("scattering"),
+                                                     propElem->Get<double>("lowFrequencyTransmission"),
+                                                     propElem->Get<double>("midFrequencyTransmission"),
+                                                     propElem->Get<double>("highFrequencyTransmission")});
+      this->ConvertMesh(_sdf->Get<std::string>("uri"));
+    }
+  }
+
+  return true;
+}
+
 
 /////////////////////////////////////////////////
 void SteamAudio::Init()
@@ -177,3 +219,31 @@ std::vector<float> SteamAudio::SteamBinauralEffect(float *_buf, long _bufSize)
   return this->outputAudio;
 }
 
+/////////////////////////////////////////////////
+void SteamAudio::ConvertMesh(std::string _meshURI)
+{
+  const common::Mesh *mesh = common::MeshManager::Instance()->Load(_meshURI);
+  const common::SubMesh *subMesh;
+  ignition::math::Vector3d vertex;
+  std::vector<IPLTriangle> tris;
+  std::vector<IPLVector3> verts;
+  for(size_t i = 0; i < mesh->GetSubMeshCount(); i++)
+  {
+    subMesh = mesh->GetSubMesh(i);
+    for(size_t j = 0; j < subMesh->GetVertexCount(); j++)
+    {
+      vertex = subMesh->Vertex(j);
+      verts.push_back(IPLVector3{(float)vertex.X(),
+                                 (float)vertex.Y(),
+                                 (float)vertex.Z()});
+    }
+    for(size_t j = 0; j < subMesh->GetIndexCount(); j += 3)
+    {
+      tris.push_back(IPLTriangle{subMesh->GetIndex(j),
+                                 subMesh->GetIndex(j+1),
+                                 subMesh->GetIndex(j+2)});
+    }
+  }
+  this->vertices.push_back(verts);
+  this->triangles.push_back(tris);
+}

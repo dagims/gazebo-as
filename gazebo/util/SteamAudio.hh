@@ -35,6 +35,10 @@
 #include "gazebo/gazebo_config.h"
 #include "gazebo/util/system.hh"
 
+#include "gazebo/msgs/msgs.hh"
+#include "gazebo/transport/transport.hh"
+
+
 
 namespace gazebo
 {
@@ -90,6 +94,12 @@ namespace gazebo
       public: std::vector<float> SteamBinauralEffect(float *_buf, long _bufSize);
 
       /// \internal
+      /// \brief Convert Gazebo style mesh to Steam style
+      /// \param[in] std::string _meshURI mesh uri from sdf
+      /// \return std::vector<IPLTriangle> Steam style mesh triangles
+      private: void ConvertMesh(std::string _meshURI);
+      
+      /// \internal
       /// \brief Audio Generator Pose
       private: ignition::math::Pose3d generatorPose;
 
@@ -144,6 +154,26 @@ namespace gazebo
       /// \internal
       /// \brief SOFA file
       private: std::string SOFAfile;
+
+      /// \internal
+      /// \brief Indices of Triangles of Meshes
+      private: std::vector<std::vector<IPLTriangle> > triangles;
+
+      /// \internal
+      /// \brief Vertices of Triangles of Meshes
+      private: std::vector<std::vector<IPLVector3> > vertices;
+
+      /// \internal
+      /// \brief Material name
+      private: std::vector<std::string> materialName;
+
+      /// \internal
+      /// \brief Preset Material Acoustic Properties
+      private: std::map<std::string, IPLMaterial> materialAcousticProp;
+
+      /// \internal
+      /// \brief Material Acoustic Properties
+      private: std::vector<IPLMaterial> materialProperties;
 
       /// \brief This is a singleton
       private: friend class SingletonT<SteamAudio>;

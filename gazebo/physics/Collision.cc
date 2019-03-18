@@ -116,7 +116,10 @@ void Collision::Load(sdf::ElementPtr _sdf)
   this->surface->Load(this->sdf->GetElement("surface"));
 
   if (this->shape)
+  {
     this->shape->Load(this->sdf->GetElement("geometry")->GetFirstElement());
+    util::SteamAudio::Instance()->Load(this->sdf->GetElement("geometry")->GetElement("mesh"));
+  }
   else
     gzwarn << "No shape has been specified. Error!!!\n";
 }
