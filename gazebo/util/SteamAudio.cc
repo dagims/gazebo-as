@@ -35,11 +35,35 @@ using namespace util;
 /////////////////////////////////////////////////
 extern "C" {
   IPLvoid steamLogCallback(char *msg);
+  void closestHitCallback(const IPLfloat32* origin, const IPLfloat32* direction,
+       const IPLfloat32 minDistance, const IPLfloat32 maxDistance,
+       IPLfloat32* hitDistance, IPLfloat32* hitNormal,
+       IPLMaterial** hitMaterial, IPLvoid* userData);
+  void anyHitCallback(const IPLfloat32* origin, const IPLfloat32 *direction,
+       const IPLfloat32 minDistance, const IPLfloat32 maxDistance,
+       IPLint32 *hitExists, IPLvoid *userData);
 }
   
 IPLvoid steamLogCallback(char *msg)
 {
   gzlog << "STEAMAUDIO LOG: " << msg << "\n";
+}
+
+void closestHitCallback(const IPLfloat32* origin, const IPLfloat32* direction,
+       const IPLfloat32 minDistance, const IPLfloat32 maxDistance,
+       IPLfloat32* hitDistance, IPLfloat32* hitNormal,
+       IPLMaterial** hitMaterial, IPLvoid* userData)
+{
+  *hitDistance = 0.0;
+  *hitNormal = 0.0;
+}
+
+
+void anyHitCallback(const IPLfloat32* origin, const IPLfloat32 *direction,
+       const IPLfloat32 minDistance, const IPLfloat32 maxDistance,
+       IPLint32 *hitExists, IPLvoid *userData)
+{
+  *hitExists = 0;
 }
 
 /////////////////////////////////////////////////
@@ -58,7 +82,7 @@ SteamAudio::SteamAudio()
   this->materialAcousticProp["metal"] = IPLMaterial{0.20f,0.07f,0.06f,0.05f,0.200f,0.025f,0.010f};
   this->materialAcousticProp["rock"] = IPLMaterial{0.13f,0.20f,0.24f,0.05f,0.015f,0.002f,0.001f};
 
-  iplCreateContext(steamLogCallback, nullptr, nullptr, &this->context);
+  iplCreateContext(steamLogCallback, nullptr, nullptr, &this->steamContext);
   this->Init();
 }
 
@@ -93,7 +117,12 @@ bool SteamAudio::Load(sdf::ElementPtr _sdf)
       this->ConvertMesh(_sdf->Get<std::string>("uri"));
     }
   }
-
+  this->worldCreatedEventCon =
+        event::Events::ConnectWorldCreated(
+              std::bind(&SteamAudio::WorldCreated, this));
+  this->worldUpdateEventCon =
+        event::Events::ConnectWorldUpdateBegin(
+              std::bind(&SteamAudio::Update, this));
   return true;
 }
 
@@ -133,7 +162,7 @@ void SteamAudio::Init()
   stereo.numSpeakers = 2;
   stereo.channelOrder = IPL_CHANNELORDER_INTERLEAVED;
 
-  iplCreateBinauralRenderer(this->context, settings, hrtfParams, &this->binauralRenderer);
+  iplCreateBinauralRenderer(this->steamContext, settings, hrtfParams, &this->binauralRenderer);
   iplCreateBinauralEffect(this->binauralRenderer, mono, stereo, &this->binauralEffect);
 
   this->inputAudio.clear();
@@ -155,7 +184,7 @@ void SteamAudio::Fini()
 {
   iplDestroyBinauralEffect(&this->binauralEffect);
   iplDestroyBinauralRenderer(&this->binauralRenderer);
-  iplDestroyContext(&this->context);
+  iplDestroyContext(&this->steamContext);
   iplCleanup();
 }
 
@@ -246,4 +275,51 @@ void SteamAudio::ConvertMesh(std::string _meshURI)
   }
   this->vertices.push_back(verts);
   this->triangles.push_back(tris);
+}
+
+/////////////////////////////////////////////////
+void SteamAudio::WorldCreated()
+{
+  IPLSimulationSettings simSettings;
+  simSettings.sceneType = IPL_SCENETYPE_EMBREE;
+  simSettings.numOcclusionSamples = 10; //XXX don't know what this is
+  simSettings.numRays = 2048;
+  simSettings.numDiffuseSamples = 2048;
+  simSettings.numBounces = 8;
+  simSettings.numThreads = 4;
+  simSettings.irDuration = 1;
+  simSettings.ambisonicsOrder = 0;
+  simSettings.maxConvolutionSources = 2;
+  simSettings.bakingBatchSize = 0;
+
+  this->userD = malloc(4000);
+
+  IPLerror ret = iplCreateScene(this->steamContext, nullptr, simSettings,
+                                this->materialProperties.size(),
+                                this->materialProperties.data(),
+                                closestHitCallback, anyHitCallback, nullptr, nullptr, nullptr,
+                                &this->steamScene);
+  if(ret == IPL_STATUS_FAILURE)
+  {
+    fprintf(stderr, "Unspecified error during scene creation\n");
+    return;
+  }
+  if(ret == IPL_STATUS_OUTOFMEMORY)
+  {
+    fprintf(stderr, "out of memory during scene creation\n");
+    return;
+  }
+  if(ret == IPL_STATUS_INITIALIZATION)
+  {
+    fprintf(stderr, "init error during scene creation\n");
+    return;
+  }
+
+  fprintf(stderr, "Successfully created the fucking scene!!!!\n");
+}
+
+/////////////////////////////////////////////////
+void SteamAudio::Update()
+{
+  
 }

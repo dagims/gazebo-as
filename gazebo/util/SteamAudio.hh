@@ -98,7 +98,15 @@ namespace gazebo
       /// \param[in] std::string _meshURI mesh uri from sdf
       /// \return std::vector<IPLTriangle> Steam style mesh triangles
       private: void ConvertMesh(std::string _meshURI);
-      
+
+      /// \internal
+      /// \brief WorldUpdate Event Callback
+      private: void Update();
+
+      /// \internal
+      /// \brief WorldCreated Event Callback
+      private: void WorldCreated();
+
       /// \internal
       /// \brief Audio Generator Pose
       private: ignition::math::Pose3d generatorPose;
@@ -113,6 +121,14 @@ namespace gazebo
 
       /// \internal
       /// \brief Audio Input object
+      private: event::ConnectionPtr worldCreatedEventCon;
+
+      /// \internal
+      /// \brief Audio Input object
+      private: event::ConnectionPtr worldUpdateEventCon;
+
+      /// \internal
+      /// \brief Audio Input object
       private: common::Audio *iaudio;
 
       /// \internal
@@ -121,11 +137,19 @@ namespace gazebo
 
       /// \internal
       /// \brief SteamAudio Context
-      private: IPLhandle context{nullptr};
+      private: IPLhandle steamContext{nullptr};
 
       /// \internal
       /// \brief SteamAudio Binaural Renderer
       private: IPLhandle binauralRenderer{nullptr};
+
+      /// \internal
+      /// \brief SteamAudio Scene
+      private: IPLhandle steamScene{nullptr};
+
+      /// \internal
+      /// \brief arbitrary memory block for use by steam
+      private: IPLhandle userD;
 
       /// \internal
       /// \brief SteamAudio Direction Vector
