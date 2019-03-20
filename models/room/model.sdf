@@ -1,0 +1,401 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="room">
+    <static>true</static>
+    <link name="walllink">
+      <collision name="wallcollision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/walls.obj</uri>
+            <acoustic>
+              <material>brick</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="wallsvisual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/walls.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="chair1link">
+      <collision name="chair1collision">
+        <pose>1 -1.5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/chair1.obj</uri>
+            <acoustic>
+              <material>brick</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="chair1visual">
+        <pose>1 -1.5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/chair1.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="chair2link">
+      <collision name="chair2collision">
+        <pose>1.5 -1.5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/chair2.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="chair2visual">
+        <pose>1.5 -1.5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/chair2.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="chair3link">
+      <collision name="chair3collision">
+        <pose>1 -1 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/chair3.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="chair3visual">
+        <pose>1 -1 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/chair3.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="longchairlink">
+      <collision name="longchaircollision">
+        <pose>-4 0.5 0 0 0 -1.57</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/longchair.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="longchairvisual">
+        <pose>-4 0.5 0 0 0 -1.57</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/longchair.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="longtablelink">
+      <collision name="longtablecollision">
+        <pose>-4 1 0 0 0 -1.57</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/longtable.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="longtablevisual">
+        <pose>-4 1 0 0 0 -1.57</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/longtable.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="smallchair1link">
+      <collision name="smallchair1collision">
+        <pose>-48 -5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/smallchair1.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="smallchair1visual">
+        <pose>-48 -5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/smallchair1.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="smallchair2link">
+      <collision name="smallchair2collision">
+        <pose>-30 -5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/smallchair2.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="smallchair2visual">
+        <pose>-30 -5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/smallchair2.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="smallchair3link">
+      <collision name="smallchair3collision">
+        <pose>-48 -5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/smallchair3.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="smallchair3visual">
+        <pose>-48 -5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/smallchair3.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="table1link">
+      <collision name="table1collision">
+        <pose>0 -2 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/table1.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="table1visual">
+        <pose>0 -2 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/table1.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="table2link">
+      <collision name="table1collision">
+        <pose>-47 -5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/table2.obj</uri>
+            <acoustic>
+              <material>wood</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="table2visual">
+        <pose>-47 -5 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/table2.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="carpet">
+      <collision name="carpetcollision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/carpet.obj</uri>
+            <acoustic>
+              <material>carpet</material>
+              <properties>
+                <lowFrequencyAbsorption>0.1</lowFrequencyAbsorption>
+                <midFrequencyAbsorption>0.5</midFrequencyAbsorption>
+                <highFrequencyAbsorption>0.9</highFrequencyAbsorption>
+                <scattering>0.5</scattering>
+                <lowFrequencyTransmission>0.9</lowFrequencyTransmission>
+                <midFrequencyTransmission>0.5</midFrequencyTransmission>
+                <highFrequencyTransmission>0.1</highFrequencyTransmission>
+              </properties>
+            </acoustic>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="carpetvisual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>0.4 0.4 0.4</scale>
+            <uri>model://room/meshes/carpet.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
