@@ -35,35 +35,11 @@ using namespace util;
 /////////////////////////////////////////////////
 extern "C" {
   IPLvoid steamLogCallback(char *msg);
-  void closestHitCallback(const IPLfloat32* origin, const IPLfloat32* direction,
-       const IPLfloat32 minDistance, const IPLfloat32 maxDistance,
-       IPLfloat32* hitDistance, IPLfloat32* hitNormal,
-       IPLMaterial** hitMaterial, IPLvoid* userData);
-  void anyHitCallback(const IPLfloat32* origin, const IPLfloat32 *direction,
-       const IPLfloat32 minDistance, const IPLfloat32 maxDistance,
-       IPLint32 *hitExists, IPLvoid *userData);
 }
   
 IPLvoid steamLogCallback(char *msg)
 {
   gzlog << "STEAMAUDIO LOG: " << msg << "\n";
-}
-
-void closestHitCallback(const IPLfloat32* origin, const IPLfloat32* direction,
-       const IPLfloat32 minDistance, const IPLfloat32 maxDistance,
-       IPLfloat32* hitDistance, IPLfloat32* hitNormal,
-       IPLMaterial** hitMaterial, IPLvoid* userData)
-{
-  *hitDistance = 0.0;
-  *hitNormal = 0.0;
-}
-
-
-void anyHitCallback(const IPLfloat32* origin, const IPLfloat32 *direction,
-       const IPLfloat32 minDistance, const IPLfloat32 maxDistance,
-       IPLint32 *hitExists, IPLvoid *userData)
-{
-  *hitExists = 0;
 }
 
 /////////////////////////////////////////////////
@@ -105,17 +81,14 @@ bool SteamAudio::Load(sdf::ElementPtr _sdf)
   if(acousticElem->HasElement("properties"))
   {
     sdf::ElementPtr propElem = acousticElem->GetElement("properties");
-    if(propElem->HasElement("lowFrequencyAbsorption"))
-    {
-      this->materialProperties.push_back(IPLMaterial{propElem->Get<double>("lowFrequencyAbsorption"),
-                                                     propElem->Get<double>("midFrequencyAbsorption"),
-                                                     propElem->Get<double>("highFrequencyAbsorption"),
-                                                     propElem->Get<double>("scattering"),
-                                                     propElem->Get<double>("lowFrequencyTransmission"),
-                                                     propElem->Get<double>("midFrequencyTransmission"),
-                                                     propElem->Get<double>("highFrequencyTransmission")});
-      this->ConvertMesh(_sdf->Get<std::string>("uri"));
-    }
+    this->materialProperties.push_back(IPLMaterial{propElem->Get<double>("lowFrequencyAbsorption"),
+                                                   propElem->Get<double>("midFrequencyAbsorption"),
+                                                   propElem->Get<double>("highFrequencyAbsorption"),
+                                                   propElem->Get<double>("scattering"),
+                                                   propElem->Get<double>("lowFrequencyTransmission"),
+                                                   propElem->Get<double>("midFrequencyTransmission"),
+                                                   propElem->Get<double>("highFrequencyTransmission")});
+    this->ConvertMesh(_sdf->Get<std::string>("uri"));
   }
   this->worldCreatedEventCon =
         event::Events::ConnectWorldCreated(
@@ -148,42 +121,57 @@ void SteamAudio::Init()
     hrtfParams.sofaFileName = nullptr;
   }
 
-  IPLRenderingSettings settings { sample_rate, frames,
-                                  IPL_CONVOLUTIONTYPE_PHONON};
-  IPLAudioFormat mono;
-  mono.channelLayoutType = IPL_CHANNELLAYOUTTYPE_SPEAKERS;
-  mono.channelLayout = IPL_CHANNELLAYOUT_MONO;
-  mono.numSpeakers = 1;
-  mono.channelOrder = IPL_CHANNELORDER_INTERLEAVED;
+  this->steamRendSettings.samplingRate = sample_rate;
+  this->steamRendSettings.frameSize = frames;
+  this->steamRendSettings.convolutionType = IPL_CONVOLUTIONTYPE_PHONON;
 
-  IPLAudioFormat stereo;
-  stereo.channelLayoutType = IPL_CHANNELLAYOUTTYPE_SPEAKERS;
-  stereo.channelLayout = IPL_CHANNELLAYOUT_STEREO;
-  stereo.numSpeakers = 2;
-  stereo.channelOrder = IPL_CHANNELORDER_INTERLEAVED;
+  this->monoAudio.channelLayoutType = IPL_CHANNELLAYOUTTYPE_SPEAKERS;
+  this->monoAudio.channelLayout = IPL_CHANNELLAYOUT_MONO;
+  this->monoAudio.numSpeakers = 1;
+  this->monoAudio.channelOrder = IPL_CHANNELORDER_INTERLEAVED;
 
-  iplCreateBinauralRenderer(this->steamContext, settings, hrtfParams, &this->binauralRenderer);
-  iplCreateBinauralEffect(this->binauralRenderer, mono, stereo, &this->binauralEffect);
+  this->stereoAudio.channelLayoutType = IPL_CHANNELLAYOUTTYPE_SPEAKERS;
+  this->stereoAudio.channelLayout = IPL_CHANNELLAYOUT_STEREO;
+  this->stereoAudio.numSpeakers = 2;
+  this->stereoAudio.channelOrder = IPL_CHANNELORDER_INTERLEAVED;
 
   this->inputAudio.clear();
-  this->inputAudioBuffer.format = mono;
+  this->inputAudioBuffer.format = this->monoAudio;
   this->inputAudioBuffer.numSamples = frames;
   this->inputAudioBuffer.interleavedBuffer = this->inputAudio.data();
   this->inputAudioBuffer.deinterleavedBuffer = nullptr;
 
   this->outputAudio.clear();
   this->outputAudio.insert(this->outputAudio.begin(), frames*2, 0); 
-  this->outputAudioBuffer.format = stereo;
+  this->outputAudioBuffer.format = this->stereoAudio;
   this->outputAudioBuffer.numSamples = frames;
   this->outputAudioBuffer.interleavedBuffer = this->outputAudio.data();
   this->outputAudioBuffer.deinterleavedBuffer = nullptr;
+
+  this->iAudio = new common::Audio();
+  this->oAudio = new common::Audio(false);
+  this->audioBuffer = (float *) malloc(frames*4);
+  this->inputAudio = std::vector<float>(frames, 0);
+  this->inputAudio = std::vector<float>(frames*2, 0);
+
+  iplCreateBinauralRenderer(this->steamContext, this->steamRendSettings,
+                            hrtfParams, &this->steamBinauralRenderer);
+  iplCreateBinauralEffect(this->steamBinauralRenderer, this->monoAudio,
+                          this->stereoAudio, &this->steamBinauralEffect);
 }
 
 /////////////////////////////////////////////////
 void SteamAudio::Fini()
 {
-  iplDestroyBinauralEffect(&this->binauralEffect);
-  iplDestroyBinauralRenderer(&this->binauralRenderer);
+  iplDestroyBinauralEffect(&this->steamBinauralEffect);
+  iplDestroyBinauralRenderer(&this->steamBinauralRenderer);
+  iplDestroyDirectSoundEffect(&this->steamDirectSoundEffect);
+  iplDestroyEnvironmentalRenderer(&this->steamEnvRenderer);
+  iplDestroyEnvironment(&this->steamEnvObj);
+  iplDestroyScene(&this->steamScene);
+  for(std::vector<IPLhandle>::iterator it = this->staticMeshes.begin();
+      it != this->staticMeshes.end(); it++)
+      iplDestroyStaticMesh(&(*it));
   iplDestroyContext(&this->steamContext);
   iplCleanup();
 }
@@ -195,10 +183,10 @@ void SteamAudio::SetSOFA(const std::string &_filename)
   // because if the file is invalid, phonon will revert
   // back to default hrtf itself - no harm.
   this->SOFAfile = common::find_file(_filename);
-  this->binauralEffect = nullptr;
-  this->binauralRenderer = nullptr;
-  iplDestroyBinauralEffect(&this->binauralEffect);
-  iplDestroyBinauralRenderer(&this->binauralRenderer);
+  this->steamBinauralEffect = nullptr;
+  this->steamBinauralRenderer = nullptr;
+  iplDestroyBinauralEffect(&this->steamBinauralEffect);
+  iplDestroyBinauralRenderer(&this->steamBinauralRenderer);
   this->Init();
 }
 
@@ -237,8 +225,8 @@ std::vector<float> SteamAudio::SteamBinauralEffect(float *_buf, long _bufSize)
 {
   this->inputAudio = std::vector<float>(_buf, _buf+_bufSize);
   this->inputAudioBuffer.interleavedBuffer = this->inputAudio.data();
-  iplApplyBinauralEffect(this->binauralEffect,
-                         this->binauralRenderer,
+  iplApplyBinauralEffect(this->steamBinauralEffect,
+                         this->steamBinauralRenderer,
                          this->inputAudioBuffer,
                          IPLVector3{(float)this->listenerLocation.X(),
                                     (float)this->listenerLocation.Y(),
@@ -280,9 +268,11 @@ void SteamAudio::ConvertMesh(std::string _meshURI)
 /////////////////////////////////////////////////
 void SteamAudio::WorldCreated()
 {
+  IPLerror ret;
   IPLSimulationSettings simSettings;
-  simSettings.sceneType = IPL_SCENETYPE_EMBREE;
-  simSettings.numOcclusionSamples = 10; //XXX don't know what this is
+  // XXX one needs embree driver to use IPL_SCENETYPE_EMBREE
+  // it's the faster one so this is just temporary
+  simSettings.sceneType = IPL_SCENETYPE_PHONON;
   simSettings.numRays = 2048;
   simSettings.numDiffuseSamples = 2048;
   simSettings.numBounces = 8;
@@ -292,34 +282,117 @@ void SteamAudio::WorldCreated()
   simSettings.maxConvolutionSources = 2;
   simSettings.bakingBatchSize = 0;
 
-  this->userD = malloc(4000);
-
-  IPLerror ret = iplCreateScene(this->steamContext, nullptr, simSettings,
+  fprintf(stderr, "Creating Scene!\n");
+  ret = iplCreateScene(this->steamContext, nullptr, simSettings,
                                 this->materialProperties.size(),
                                 this->materialProperties.data(),
-                                closestHitCallback, anyHitCallback, nullptr, nullptr, nullptr,
+                                nullptr, nullptr, nullptr, nullptr, nullptr,
                                 &this->steamScene);
-  if(ret == IPL_STATUS_FAILURE)
-  {
-    fprintf(stderr, "Unspecified error during scene creation\n");
+  if(!this->SteamErrorCheck(ret))
     return;
-  }
-  if(ret == IPL_STATUS_OUTOFMEMORY)
+  fprintf(stderr, "Successfully created the fucking scene!!!!\n");
+
+  // creating a static mesh for each mesh object.
+  this->staticMeshes = std::vector<IPLhandle>(this->triangles.size(), nullptr);
+  for(size_t idx = 0; idx < this->triangles.size(); idx++)
   {
-    fprintf(stderr, "out of memory during scene creation\n");
-    return;
-  }
-  if(ret == IPL_STATUS_INITIALIZATION)
-  {
-    fprintf(stderr, "init error during scene creation\n");
-    return;
+    fprintf(stderr, "Creating Static Mesh!\n");
+    ret = iplCreateStaticMesh(this->steamScene, 
+                            this->vertices[idx].size(),
+                            this->triangles[idx].size(),
+                            this->vertices[idx].data(),
+                            this->triangles[idx].data(),
+                            std::vector<IPLint32>(this->triangles[idx].size(),
+                                                  idx).data(),
+                            &(this->staticMeshes[idx]));
+    if(!this->SteamErrorCheck(ret))
+      return;
+    fprintf(stderr, "Successfully created the fucking static mesh!!!!\n");
+
   }
 
-  fprintf(stderr, "Successfully created the fucking scene!!!!\n");
+  //XXX just to check if scene exported correctly - remove when done
+  iplSaveSceneAsObj(this->steamScene, "steamloadedmesh");
+
+  // create environment renderer
+  ret = iplCreateEnvironment(this->steamContext, nullptr,
+                                      simSettings, this->steamScene,
+                                      nullptr, &this->steamEnvObj);
+  if(!this->SteamErrorCheck(ret))
+    return;
+  fprintf(stderr, "Successfully created the fucking environment object!!!!\n");
+
+  ret = iplCreateEnvironmentalRenderer(this->steamContext,
+                                       this->steamEnvObj,
+                                       this->steamRendSettings,
+                                       this->stereoAudio,
+                                       nullptr,
+                                       nullptr,
+                                       &this->steamEnvRenderer);
+  
+  if(!this->SteamErrorCheck(ret))
+    return;
+  fprintf(stderr, "Successfully created the fucking environment Renderer!!!!\n");
+
+  this->directSoundMode.applyDistanceAttenuation = IPL_TRUE;
+  this->directSoundMode.applyAirAbsorption = IPL_TRUE;
+  this->directSoundMode.applyDirectivity = IPL_TRUE;
+  this->directSoundMode.directOcclusionMode =
+                          IPL_DIRECTOCCLUSION_TRANSMISSIONBYFREQUENCY;
+
+  ret = iplCreateDirectSoundEffect(this->steamContext,
+                                   this->monoAudio,
+                                   this->stereoAudio,
+                                   &this->steamDirectSoundEffect);
+  if(!this->SteamErrorCheck(ret))
+    return;
+  fprintf(stderr, "Successfully created the fucking Direct Sound Effect!!!!\n");
+
 }
 
 /////////////////////////////////////////////////
 void SteamAudio::Update()
 {
+  // TODO clean up here! Ugly thing you doing with the buffer
+  this->iAudio->ReadFrames(&this->audioBuffer, this->bufferSize);
+  this->inputAudio = std::vector<float>(this->audioBuffer,
+                                        this->audioBuffer+this->bufferSize);
+  this->inputAudioBuffer.interleavedBuffer = this->inputAudio.data();
   
+  this->steamDirectSoundPath.direction = IPLVector3{1, 1, 1};
+  this->steamDirectSoundPath.distanceAttenuation = 0.5;
+  this->steamDirectSoundPath.airAbsorption[0] = 1.0;
+  this->steamDirectSoundPath.airAbsorption[1] = 1.0;
+  this->steamDirectSoundPath.airAbsorption[2] = 1.0;
+  this->steamDirectSoundPath.propagationDelay = 0.1;
+  this->steamDirectSoundPath.occlusionFactor = 0.5;
+  this->steamDirectSoundPath.transmissionFactor[0] = 1;
+  this->steamDirectSoundPath.transmissionFactor[1] = 1;
+  this->steamDirectSoundPath.transmissionFactor[2] = 1;
+  this->steamDirectSoundPath.directivityFactor = 0.5;
+  
+  iplApplyDirectSoundEffect(this->steamDirectSoundEffect,
+                            this->inputAudioBuffer,
+                            this->steamDirectSoundPath,
+                            this->directSoundMode,
+                            this->outputAudioBuffer);
+  
+  this->oAudio->WriteFrames(this->outputAudio.data(), 64);
+
+}
+
+/////////////////////////////////////////////////
+bool SteamAudio::SteamErrorCheck(IPLerror errCode)
+{
+    // TODO replace the fprintfs with gzerr
+    if(errCode == IPL_STATUS_SUCCESS)
+      return true;
+    
+    if(errCode == IPL_STATUS_FAILURE)
+      fprintf(stderr, "Unspecified error!\n");
+    if(errCode == IPL_STATUS_OUTOFMEMORY)
+      fprintf(stderr, "out of memory error!\n");
+    if(errCode == IPL_STATUS_INITIALIZATION)
+      fprintf(stderr, "Initing external dependancy error!\n");
+    return false;
 }

@@ -99,6 +99,10 @@ namespace gazebo
       /// \return std::vector<IPLTriangle> Steam style mesh triangles
       private: void ConvertMesh(std::string _meshURI);
 
+      
+      /// \brief Steam Error Check
+      private: bool SteamErrorCheck(IPLerror errCode);
+
       /// \internal
       /// \brief WorldUpdate Event Callback
       private: void Update();
@@ -120,6 +124,10 @@ namespace gazebo
       private: ignition::math::Vector3d listenerLocation;
 
       /// \internal
+      /// \brief SteamAudio Direction Vector
+      private: IPLVector3 listenerDirection;
+
+      /// \internal
       /// \brief Audio Input object
       private: event::ConnectionPtr worldCreatedEventCon;
 
@@ -129,35 +137,67 @@ namespace gazebo
 
       /// \internal
       /// \brief Audio Input object
-      private: common::Audio *iaudio;
+      private: common::Audio *iAudio;
 
       /// \internal
       /// \brief Audio Output object
-      private: common::Audio *oaudio;
+      private: common::Audio *oAudio;
+
+      /// \internal
+      /// \brief Audio Buffer
+      private: float *audioBuffer;
+
+      /// \internal
+      /// \brief Audio Buffer Size
+      private: long bufferSize;
 
       /// \internal
       /// \brief SteamAudio Context
       private: IPLhandle steamContext{nullptr};
 
       /// \internal
+      /// \brief SteamAudio Rendering settings
+      private: IPLRenderingSettings steamRendSettings;
+
+      /// \internal
+      /// \brief SteamAudio Mono Audio Format
+      private: IPLAudioFormat monoAudio;
+
+      /// \internal
+      /// \brief SteamAudio Stereo Audio Format
+      private: IPLAudioFormat stereoAudio;
+
+      /// \internal
       /// \brief SteamAudio Binaural Renderer
-      private: IPLhandle binauralRenderer{nullptr};
+      private: IPLhandle steamBinauralRenderer{nullptr};
+
+      /// \internal
+      /// \brief SteamAudio Binaural Effect
+      private: IPLhandle steamBinauralEffect{nullptr};
 
       /// \internal
       /// \brief SteamAudio Scene
       private: IPLhandle steamScene{nullptr};
 
       /// \internal
-      /// \brief arbitrary memory block for use by steam
-      private: IPLhandle userD;
+      /// \brief SteamAudio Environment Object
+      private: IPLhandle steamEnvObj{nullptr};
 
       /// \internal
-      /// \brief SteamAudio Direction Vector
-      private: IPLVector3 listenerDirection;
+      /// \brief SteamAudio Environmental Renderer
+      private: IPLhandle steamEnvRenderer{nullptr};
 
       /// \internal
-      /// \brief SteamAudio Binaural Effect
-      private: IPLhandle binauralEffect{nullptr};
+      /// \brief SteamAudio Direct Sound Path
+      private: IPLDirectSoundPath steamDirectSoundPath;
+
+      /// \internal
+      /// \brief SteamAudio Direct Sound Effect Options
+      private: IPLDirectSoundEffectOptions directSoundMode;
+
+      /// \internal
+      /// \brief SteamAudio Direct Sound Effect
+      private: IPLhandle steamDirectSoundEffect{nullptr};
 
       /// \internal
       /// \brief Input Audio Buffer
@@ -198,6 +238,10 @@ namespace gazebo
       /// \internal
       /// \brief Material Acoustic Properties
       private: std::vector<IPLMaterial> materialProperties;
+
+      /// \internal
+      /// \brief Steam Audio Static Mesh Objects
+      private: std::vector<IPLhandle> staticMeshes;
 
       /// \brief This is a singleton
       private: friend class SingletonT<SteamAudio>;
